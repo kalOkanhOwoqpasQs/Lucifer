@@ -35,6 +35,7 @@ eventX = dropeventX - 1
 eventY = dropeventY -1
 
 if indexbot then
+    getBot().auto_reconnect = false
     if ignoregems then
         getBot().ignore_gems = true
     end
