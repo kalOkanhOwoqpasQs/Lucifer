@@ -35,6 +35,9 @@ eventX = dropeventX - 1
 eventY = dropeventY -1
 
 if indexbot then
+    if ignoregems then
+        getBot().ignore_gems = true
+    end
     for i =  1,worldperbot do
         table.insert(worlds,farmList[math.floor((indexbot - 1) * worldperbot + i)])
     end
@@ -1351,8 +1354,9 @@ if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : ht
     if autologin and not indexbot then
         setting.main()
     end
-    if ignoregems then
-        getBot().ignore_gems = true
+    while getBot().status ~= BotStatus.online do
+        getBot():connect()
+        sleep(delayreconnect)
     end
     for idx, value in ipairs(worlds) do
         ::BACK::
