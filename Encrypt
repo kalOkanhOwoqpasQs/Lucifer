@@ -35,6 +35,11 @@ eventX = dropeventX - 1
 eventY = dropeventY -1
 
 if indexbot then
+    startY = 1 + ((indexbot - 1) * 2)
+    increment = #getBots() * 2
+    getBot().legit_mode = false
+    getBot().move_range = moveRange
+    getBot().move_interval = moveInterval
     getBot().auto_reconnect = false
     if ignoregems then
         getBot().ignore_gems = true
@@ -119,7 +124,7 @@ end
 setting.botstatus = function()
     strings = ""
     for _, bot in pairs(getBots()) do
-        strings = strings.."\n["..bot.level.."]"..string.upper(bot.name).."" 
+        strings = strings.."\n["..bot.level.."]||"..string.upper(bot.name).."||" 
     end
     return strings
 end
@@ -127,7 +132,7 @@ end
 setting.botworld = function()
     strings = ""
     for _, bots in pairs(getBots()) do
-        strings = strings.."\n"..string.upper(bots:getWorld().name).."" 
+        strings = strings.."\n||"..string.upper(bots:getWorld().name).."||" 
     end
     return strings
 end
@@ -143,7 +148,7 @@ end
 setting.hookblock = function()
     str = ""
 	for i = 1, #storageblock do
-        str = str.."\n"..string.upper(storageblock[i]).." : "..(infoblock[storageblock[i]] or "?")..""
+        str = str.."\n||"..string.upper(storageblock[i]).."|| : "..(infoblock[storageblock[i]] or "?")..""
     end
     return str
 end
@@ -151,7 +156,7 @@ end
 setting.hookseed = function()
     str = ""
 	for i = 1, #storageseed do
-        str = str.."\n"..string.upper(storageseed[i]).." : "..(infoseed[storageseed[i]] or "?")..""
+        str = str.."\n||"..string.upper(storageseed[i]).."|| : "..(infoseed[storageseed[i]] or "?")..""
     end
     return str
 end
@@ -159,7 +164,7 @@ end
 setting.hookpack = function()
     str = ""
 	for i = 1, #storagepack do
-        str = str.."\n"..string.upper(storagepack[i]).." : "..(infopack[storagepack[i]] or "?")..""
+        str = str.."\n||"..string.upper(storagepack[i]).."|| : "..(infopack[storagepack[i]] or "?")..""
     end
     return str
 end
@@ -167,13 +172,14 @@ end
 setting.hookevent = function()
     str = ""
 	for i = 1, #storageevent do
-        str = str.."\n"..string.upper(storageevent[i]).." : "..(infoevent[storageevent[i]] or "?")..""
+        str = str.."\n||"..string.upper(storageevent[i]).."|| : "..(infoevent[storageevent[i]] or "?")..""
     end
     return str
 end
 
 setting.webhookinfo = function()
 	if botinfo then
+        realtime = os.time() - params.timechecker
         local text = [[
             $webHookUrl = "]]..linkbotinfo..[[/messages/]]..messageidbotinfo..[["
             $payload = @{
@@ -184,13 +190,13 @@ setting.webhookinfo = function()
                         color = "]]..math.random(111111,999999)..[["
                         fields = @(
                             @{
-                                name = "TOTAL GEMS & RUNTIME"
-                                value = "]]..setting.botgems().. " & " ..setting.goodtimes(os.difftime(os.time(),params.timechecker))..[["
+                                name = ""
+                                value = "]].."RUNTIME : "..math.floor(realtime/86400).." Days "..math.floor(realtime%86400/3600).." Hours "..math.floor(realtime%86400%3600/60).." Minutes"..[["
                                 inline = "false"
                             }
                             @{
-                                name = "BOTS & STORAGE STATICS :"
-                                value = "]]..""..[["
+                                name = ""
+                                value = "]].."TOTAL GEMS : "..setting.botgems()..[["
                                 inline = "false"
                             }
                             @{
@@ -215,7 +221,7 @@ setting.webhookinfo = function()
                             @{
                                 name = "STORAGE BLOCK"
                                 value = "]]..setting.hookblock()..[["
-                                inline = "false"
+                                inline = "true"
                             }
                             @{
                                 name = "STORAGE SEED"
@@ -263,18 +269,6 @@ setting.botinfo = function(text)
         local file = io.popen("powershell -command -", "w")
         file:write(text)
         file:close()
-    end
-end
-
-setting.goodtimes = function(estimates)
-    local seconds = tonumber(estimates)
-    if seconds <= 0 then
-        return "00:00:00";
-    else
-        hours = string.format("%02.f", math.floor(estimates/3600));
-        minutes = string.format("%02.f", math.floor(estimates/60 - (hours*60)));
-        seconds = string.format("%02.f", math.floor(estimates - hours*3600 - minutes *60));
-        return ""..hours.." : "..minutes.." : "..seconds
     end
 end
 
@@ -492,11 +486,11 @@ end
 
 setting.storingevents = function()
     for i = params.event , #storageevent do
-        ::Here::
         print("["..indexbot.."]Dropping events")
         world = storageevent[i]
         setting.warp(world,doorstorageevent,delaywarp)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -618,6 +612,7 @@ setting.storingevents = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstorageevent)
             goto Here
         end
     end
@@ -629,11 +624,11 @@ end
 
 setting.storingpacks = function()
     for i = params.pack , #storagepack do
-        ::Here::
         print("["..indexbot.."]Dropping packs")
         world = storagepack[i]
         setting.warp(world,doorstoragepack,delaywarp)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -755,6 +750,7 @@ setting.storingpacks = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstoragepack)
             goto Here
         end
     end
@@ -766,11 +762,11 @@ end
 
 setting.storingseeds = function()
     for i = params.seed , #storageseed do
-        ::Here::
         world = storageseed[i]
         print("["..indexbot.."]Dropping seeds")
         setting.warp(world,doorstorageseed,delaywarp)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -863,6 +859,7 @@ setting.storingseeds = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstorageseed)
             goto Here
         end
     end
@@ -874,11 +871,11 @@ end
 
 setting.storingblocks = function()
     for i = params.block , #storageblock do
-        ::Here::
         world = storageblock[i]
         print("["..indexbot.."]Dropping Blocks")
         setting.warp(world,doorstorageblock,delaywarp)
         setting.webhookinfo()
+        ::Here::
         if not subserver then
             if not nuked then
                 if not wrong then
@@ -971,6 +968,7 @@ setting.storingblocks = function()
             print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
             setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
             sleep(120000)
+            setting.reconnect(world,doorstorageblock)
             goto Here
         end
     end
@@ -982,70 +980,156 @@ end
 
 setting.rechecking = function(threads)
     ::back::
-    for _, tile in pairs(getBot():getWorld():getTiles()) do
-        if tile.fg == seed and tile:canHarvest() then
-            if findItem(idwearitem) == 0 and wearitem then
-                while findItem(idwearitem) == 0 do
-                    setting.support()
-                    sleep(6000)
+    if not multiplebot then
+        for _, tile in pairs(getBot():getWorld():getTiles()) do
+            if tile.fg == seed and tile:canHarvest() then
+                if findItem(idwearitem) == 0 and wearitem then
+                    while findItem(idwearitem) == 0 do
+                        setting.support()
+                        sleep(6000)
+                    end
+                    print("["..indexbot.."]Rechecking")
+                    setting.warp(threads,doorfarmList,delaywarp)
+                    goto back
                 end
-                print("["..indexbot.."]Rechecking")
-                setting.warp(threads,doorfarmList,delaywarp)
-                goto back
-            end
-            if findItem(block) >= amountblock then
-                if recycle then
-                    setting.recycles()
-                else
-                    setting.storingblocks()
+                if findItem(block) >= amountblock then
+                    if recycle then
+                        setting.recycles()
+                    else
+                        setting.storingblocks()
+                        print("["..indexbot.."]Rechecking")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto back
+                    end
+                end
+                if autoSwitch and getBot().level >= switchOnLevel then
+                    if findItem(block) > 0 then
+                        setting.storingblocks()
+                    end
+                    if findItem(seed) > 0 then
+                        setting.storingseeds()
+                    end
+                    setting.backupacc()
+                    setting.warp(threads,doorfarmList,delaywarp)
+                    setting.webhookinfo()
+                    goto back
+                end
+                if findItem(itemevent[1]) > amount then
+                    setting.storingevents()
+                    print("["..indexbot.."]Rechecking")
+                    setting.warp(threads,doorfarmList,delaywarp)
+                    setting.webhookinfo()
+                    goto back
+                elseif findItem(seed) > amountseed then
+                    setting.storingseeds()
+                    print("["..indexbot.."]Rechecking")
+                    setting.warp(threads,doorfarmList,delaywarp)
+                    setting.webhookinfo()
+                    goto back
+                elseif getBot().gem_count >= mingems and buypack then
+                    setting.buying()
+                    setting.storingpacks()
                     print("["..indexbot.."]Rechecking")
                     setting.warp(threads,doorfarmList,delaywarp)
                     setting.webhookinfo()
                     goto back
                 end
-            end
-            if autoSwitch and getBot().level >= switchOnLevel then
-                if findItem(block) > 0 then
-                    setting.storingblocks()
-                end
-                if findItem(seed) > 0 then
-                    setting.storingseeds()
-                end
-                setting.backupacc()
-                setting.warp(threads,doorfarmList,delaywarp)
-                setting.webhookinfo()
-                goto back
-            end
-            if findItem(itemevent[1]) > amount then
-                setting.storingevents()
-                print("["..indexbot.."]Rechecking")
-                setting.warp(threads,doorfarmList,delaywarp)
-                setting.webhookinfo()
-                goto back
-            elseif findItem(seed) > amountseed then
-                setting.storingseeds()
-                print("["..indexbot.."]Rechecking")
-                setting.warp(threads,doorfarmList,delaywarp)
-                setting.webhookinfo()
-                goto back
-            elseif getBot().gem_count >= mingems and buypack then
-                setting.buying()
-                setting.storingpacks()
-                print("["..indexbot.."]Rechecking")
-                setting.warp(threads,doorfarmList,delaywarp)
-                setting.webhookinfo()
-                goto back
-            end
-            findPath(tile.x,tile.y)
-            sleep(delayharvest)
-            setting.reconnect(threads,doorfarmList,tile.x,tile.y)
-            if tile.fg == seed then
-                punch(0,0)
-                sleep(delayharvest)
+                findPath(tile.x,tile.y)
+                sleep(30)
                 setting.reconnect(threads,doorfarmList,tile.x,tile.y)
+                if tile.fg == seed then
+                    punch(0,0)
+                    sleep(delayharvest)
+                    setting.reconnect(threads,doorfarmList,tile.x,tile.y)
+                end
+                collect(range)
+                sleep(30)
             end
-            collect(range)
-            sleep(30)
+        end
+    else
+        for y = startY, 53, increment do
+            for x = tileA, tileB, tileC do
+                if getTile(x,y).fg == seed and getTile(x,y):canHarvest() then
+                    if findItem(idwearitem) == 0 and wearitem then
+                        while findItem(idwearitem) == 0 do
+                            setting.support()
+                            sleep(6000)
+                        end
+                        print("["..indexbot.."]Rechecking")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        goto back
+                    end
+                    if findItem(block) > amountblock then
+                        if recycle then
+                            setting.recycles(threads)
+                        else
+                            setting.storingblocks()
+                            print("["..indexbot.."]Rechecking")
+                            setting.warp(threads,doorfarmList,delaywarp)
+                            setting.webhookinfo()
+                            goto back
+                        end
+                    end
+                    if autoSwitch and getBot().level >= switchOnLevel then
+                        if findItem(block) > 0 then
+                            setting.storingblocks()
+                        end
+                        if findItem(seed) > 0 then
+                            setting.storingseeds()
+                        end
+                        setting.backupacc()
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto back
+                    end
+                    if findItem(itemevent[1]) > amount then
+                        setting.storingevents()
+                        print("["..indexbot.."]Rechecking")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto back
+                    elseif findItem(seed) > amountseed then
+                        setting.storingseeds()
+                        print("["..indexbot.."]Rechecking")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto back
+                    elseif getBot().gem_count >= mingems and buypack then
+                        setting.buying()
+                        setting.storingpacks()
+                        print("["..indexbot.."]Rechecking")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto back
+                    end
+                    findPath(x,y)
+                    sleep(30)
+                    setting.reconnect(threads,doorfarmList,x,y)
+                    if getTile(x,y).fg == seed then
+                        punch(0,0)
+                        sleep(delayharvest)
+                        setting.reconnect(threads,doorfarmList,x,y)
+                    end
+                    collect(range)
+                    sleep(25)
+                end
+            end
+            if tileD == 1 then
+                if tileA == 0 then
+                    tileA = 99
+                    tileB = 0
+                    tileC = -1
+                    tileD = 0
+                elseif tileA == 99 then
+                    tileA = 0
+                    tileB = 99
+                    tileC = 1
+                    tileD = 0
+                end
+            elseif tileD == 0 then
+                tileD = tileD + 1
+            end
         end
     end
     for _, obj in pairs(getBot():getWorld():getObjects()) do
@@ -1093,93 +1177,179 @@ setting.rechecking = function(threads)
 end
 
 setting.running = function(threads)
-    print("["..indexbot.."]Harvest")
     tileA = 99
     tileB = 0
     tileC = -1
     tileD = 0
     ::BACK::
-    for y = -1, 53 do
-        for x = tileA, tileB, tileC do
-            if getTile(x,y).fg == seed and getTile(x,y):canHarvest() then
-                if findItem(idwearitem) == 0 and wearitem then
-                    while findItem(idwearitem) == 0 do
-                        setting.support()
-                        sleep(6000)
+    print("["..indexbot.."]Harvest")
+    if not multiplebot then
+        for y = -1, 53 do
+            for x = tileA, tileB, tileC do
+                if getTile(x,y).fg == seed and getTile(x,y):canHarvest() then
+                    if findItem(idwearitem) == 0 and wearitem then
+                        while findItem(idwearitem) == 0 do
+                            setting.support()
+                            sleep(6000)
+                        end
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        goto BACK
                     end
-                    print("["..indexbot.."]Harvest")
-                    setting.warp(threads,doorfarmList,delaywarp)
-                    goto BACK
-                end
-                if findItem(block) > amountblock then
-                    if recycle then
-                        setting.recycles(threads)
-                    else
-                        setting.storingblocks()
+                    if findItem(block) > amountblock then
+                        if recycle then
+                            setting.recycles(threads)
+                        else
+                            setting.storingblocks()
+                            print("["..indexbot.."]Harvest")
+                            setting.warp(threads,doorfarmList,delaywarp)
+                            setting.webhookinfo()
+                            goto BACK
+                        end
+                    end
+                    if autoSwitch and getBot().level >= switchOnLevel then
+                        if findItem(block) > 0 then
+                            setting.storingblocks()
+                        end
+                        if findItem(seed) > 0 then
+                            setting.storingseeds()
+                        end
+                        setting.backupacc()
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    end
+                    if findItem(itemevent[1]) > amount then
+                        setting.storingevents()
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    elseif findItem(seed) > amountseed then
+                        setting.storingseeds()
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    elseif getBot().gem_count >= mingems and buypack then
+                        setting.buying()
+                        setting.storingpacks()
                         print("["..indexbot.."]Harvest")
                         setting.warp(threads,doorfarmList,delaywarp)
                         setting.webhookinfo()
                         goto BACK
                     end
-                end
-                if autoSwitch and getBot().level >= switchOnLevel then
-                    if findItem(block) > 0 then
-                        setting.storingblocks()
-                    end
-                    if findItem(seed) > 0 then
-                        setting.storingseeds()
-                    end
-                    setting.backupacc()
-                    setting.warp(threads,doorfarmList,delaywarp)
-                    setting.webhookinfo()
-                    goto BACK
-                end
-                if findItem(itemevent[1]) > amount then
-                    setting.storingevents()
-                    print("["..indexbot.."]Harvest")
-                    setting.warp(threads,doorfarmList,delaywarp)
-                    setting.webhookinfo()
-                    goto BACK
-                elseif findItem(seed) > amountseed then
-                    setting.storingseeds()
-                    print("["..indexbot.."]Harvest")
-                    setting.warp(threads,doorfarmList,delaywarp)
-                    setting.webhookinfo()
-                    goto BACK
-                elseif getBot().gem_count >= mingems and buypack then
-                    setting.buying()
-                    setting.storingpacks()
-                    print("["..indexbot.."]Harvest")
-                    setting.warp(threads,doorfarmList,delaywarp)
-                    setting.webhookinfo()
-                    goto BACK
-                end
-                findPath(x,y)
-                sleep(delayharvest)
-                setting.reconnect(threads,doorfarmList,x,y)
-                if getTile(x,y).fg == seed then
-                    punch(0,0)
-                    sleep(delayharvest)
+                    findPath(x,y)
+                    sleep(30)
                     setting.reconnect(threads,doorfarmList,x,y)
+                    if getTile(x,y).fg == seed then
+                        punch(0,0)
+                        sleep(delayharvest)
+                        setting.reconnect(threads,doorfarmList,x,y)
+                    end
+                    collect(range)
+                    sleep(25)
                 end
-                collect(range)
-                sleep(25)
+            end
+            if tileD == 1 then
+                if tileA == 0 then
+                    tileA = 99
+                    tileB = 0
+                    tileC = -1
+                    tileD = 0
+                elseif tileA == 99 then
+                    tileA = 0
+                    tileB = 99
+                    tileC = 1
+                    tileD = 0
+                end
+            elseif tileD == 0 then
+                tileD = tileD + 1
             end
         end
-        if tileD == 1 then
-            if tileA == 0 then
-                tileA = 99
-                tileB = 0
-                tileC = -1
-                tileD = 0
-            elseif tileA == 99 then
-                tileA = 0
-                tileB = 99
-                tileC = 1
-                tileD = 0
+    else
+        for y = startY, 53, increment do
+            for x = tileA, tileB, tileC do
+                if getTile(x,y).fg == seed and getTile(x,y):canHarvest() then
+                    if findItem(idwearitem) == 0 and wearitem then
+                        while findItem(idwearitem) == 0 do
+                            setting.support()
+                            sleep(6000)
+                        end
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        goto BACK
+                    end
+                    if findItem(block) > amountblock then
+                        if recycle then
+                            setting.recycles(threads)
+                        else
+                            setting.storingblocks()
+                            print("["..indexbot.."]Harvest")
+                            setting.warp(threads,doorfarmList,delaywarp)
+                            setting.webhookinfo()
+                            goto BACK
+                        end
+                    end
+                    if autoSwitch and getBot().level >= switchOnLevel then
+                        if findItem(block) > 0 then
+                            setting.storingblocks()
+                        end
+                        if findItem(seed) > 0 then
+                            setting.storingseeds()
+                        end
+                        setting.backupacc()
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    end
+                    if findItem(itemevent[1]) > amount then
+                        setting.storingevents()
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    elseif findItem(seed) > amountseed then
+                        setting.storingseeds()
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    elseif getBot().gem_count >= mingems and buypack then
+                        setting.buying()
+                        setting.storingpacks()
+                        print("["..indexbot.."]Harvest")
+                        setting.warp(threads,doorfarmList,delaywarp)
+                        setting.webhookinfo()
+                        goto BACK
+                    end
+                    findPath(x,y)
+                    sleep(30)
+                    setting.reconnect(threads,doorfarmList,x,y)
+                    if getTile(x,y).fg == seed then
+                        punch(0,0)
+                        sleep(delayharvest)
+                        setting.reconnect(threads,doorfarmList,x,y)
+                    end
+                    collect(range)
+                    sleep(25)
+                end
             end
-        elseif tileD == 0 then
-            tileD = tileD + 1
+            if tileD == 1 then
+                if tileA == 0 then
+                    tileA = 99
+                    tileB = 0
+                    tileC = -1
+                    tileD = 0
+                elseif tileA == 99 then
+                    tileA = 0
+                    tileB = 99
+                    tileC = 1
+                    tileD = 0
+                end
+            elseif tileD == 0 then
+                tileD = tileD + 1
+            end
         end
     end
 end
@@ -1206,15 +1376,17 @@ setting.support = function()
                             break
                         end
                     end
-                    move(1,0)
-                    sleep(500)
-                    getBot():wear(idwearitem)
-                    getBot():setDirection(true)
-                    sleep(500)
-                    drop(idwearitem,findItem(idwearitem) - keep)
-                    sleep(500)
-                    print("["..indexbot.."]("..getBot().name..") Success take and wear the support items!")
-                    setting.botinfo("("..getBot().name..") Success take and wear the support items!")
+                    if findItem(idwearitem) > 0  then
+                        move(1,0)
+                        sleep(500)
+                        getBot():wear(idwearitem)
+                        getBot():setDirection(true)
+                        sleep(500)
+                        drop(idwearitem,findItem(idwearitem) - keep)
+                        sleep(500)
+                        print("["..indexbot.."]("..getBot().name..") Success take and wear the support items!")
+                        setting.botinfo("("..getBot().name..") Success take and wear the support items!")
+                    end
                 else
                     print("["..indexbot.."]Support item is empty, Drop the support item right now!")
                     setting.botinfo("Support item is empty, Drop the support item right now! @everyone")
@@ -1340,10 +1512,23 @@ setting.main = function()
             sleep(delayloginbot)
         end
     end
-    print("Please select all and re-execute script")
 end
 
 setting.setauth = function()
+    if not indexbot and proxyServerDatabase then
+        getProxyManager().custom_http_proxy = true
+        getProxyManager().http_cooldown = delayDataBase
+        if useDatabaseForMainProxy then
+            getProxyManager().use_main_ip = true -- Use Main IP in Data Proxy Tab.
+        end
+        if setDatabaseType == "http" then
+            addDataProxy(proxyDatabase, Proxy.http) 
+        elseif setDatabaseType == "https" then
+            addDataProxy(proxyDatabase, Proxy.https)
+        elseif setDatabaseType == "socks" then
+            addDataProxy(proxyDatabase, Proxy.socks5)
+        end
+    end
     if not indexbot and withproxy then
         getProxyManager():setLimit(botperproxy)
         for _, lists in pairs(proxyList) do
@@ -1352,7 +1537,7 @@ setting.setauth = function()
     end
 end
 
-if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq" then
+if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq" and scriptVersion == "0.1" then
     setting.setauth()
     if autologin and not indexbot then
         setting.main()
@@ -1361,38 +1546,77 @@ if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : ht
         getBot():connect()
         sleep(delayreconnect)
     end
-    for idx, value in ipairs(worlds) do
-        ::BACK::
-        setting.warp(value,doorfarmList,5000)
-        setting.webhookinfo()
-        if not subserver then
-            if not nuked then
-                if not wrong then
-                    setting.running(value)
-                    setting.rechecking(value)
+    sleep(delayexecute * indexbot)
+    if not multiplebot then
+        for idx, value in ipairs(worlds) do
+            ::BACK::
+            setting.warp(value,doorfarmList,5000)
+            setting.webhookinfo()
+            if not subserver then
+                if not nuked then
+                    if not wrong then
+                        setting.running(value)
+                        setting.rechecking(value)
+                    else
+                        setting.writeFile("("..value..") is wrong id")
+                        sleep(1000)
+                        wrong = false
+                        sleep(5000)
+                        print("["..indexbot.."]"..value.." is wrong door id, skipped world")
+                        setting.botinfo("("..value..") is wrong door id, skipped world @everyone")
+                    end
                 else
-                    setting.writeFile("("..value..") is wrong id")
+                    setting.writeFile("("..value..") is NUKED !!")
                     sleep(1000)
-                    wrong = false
+                    nuked = false
                     sleep(5000)
-                    print("["..indexbot.."]"..value.." is wrong door id, skipped world")
-                    setting.botinfo("("..value..") is wrong door id, skipped world @everyone")
+                    print("["..indexbot.."]"..value.." is NUKED!, check ur world !!")
+                    setting.botinfo("("..value..") is NUKED!, check ur world !! @everyone")
                 end
             else
-                setting.writeFile("("..value..") is NUKED !!")
-                sleep(1000)
-                nuked = false
+                subserver = false
                 sleep(5000)
-                print("["..indexbot.."]"..value.." is NUKED!, check ur world !!")
-                setting.botinfo("("..value..") is NUKED!, check ur world !! @everyone")
+                print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
+                setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
+                sleep(120000)
+                goto BACK
             end
-        else
-            subserver = false
-            sleep(5000)
-            print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
-            setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
-            sleep(120000)
-            goto BACK
+        end
+    else
+        for idx, value in ipairs(farmList) do
+            setting.warp(value,doorfarmList,5000)
+            setting.webhookinfo()
+            ::BACK::
+            if not subserver then
+                if not nuked then
+                    if not wrong then
+                        setting.running(value)
+                        setting.rechecking(value)
+                    else
+                        setting.writeFile("("..value..") is wrong id")
+                        sleep(1000)
+                        wrong = false
+                        sleep(5000)
+                        print("["..indexbot.."]"..value.." is wrong door id, skipped world")
+                        setting.botinfo("("..value..") is wrong door id, skipped world @everyone")
+                    end
+                else
+                    setting.writeFile("("..value..") is NUKED !!")
+                    sleep(1000)
+                    nuked = false
+                    sleep(5000)
+                    print("["..indexbot.."]"..value.." is NUKED!, check ur world !!")
+                    setting.botinfo("("..value..") is NUKED!, check ur world !! @everyone")
+                end
+            else
+                subserver = false
+                sleep(5000)
+                print("["..indexbot.."]Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes")
+                setting.botinfo("Bot : "..getBot().name.." system is sub-server, sleeping for 2 minutes @everyone")
+                sleep(120000)
+                setting.reconnect(value,doorfarmList)
+                goto BACK
+            end
         end
     end
     print("["..indexbot.."]("..getBot().name..") Already finished all world, Terminated script!")
