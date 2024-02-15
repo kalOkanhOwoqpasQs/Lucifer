@@ -848,6 +848,7 @@ customizable.onBlock = function()
 end
 
 customizable.recheckingWorld = function(threads)
+    ::BACK::
     print("["..pcallBot.."]Rechecking")
     for i = 1, 2 do
         if not multiplebot then
@@ -872,6 +873,7 @@ customizable.recheckingWorld = function(threads)
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
                 if getBot():getInventory():getItemCount(block) >= amountblock then
                     if recycle then
@@ -882,6 +884,7 @@ customizable.recheckingWorld = function(threads)
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
                     end
+                    goto BACK
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
                     if getBot():getInventory():getItemCount(block) > 0 then
@@ -893,23 +896,27 @@ customizable.recheckingWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
                 if getBot():getInventory():getItemCount(itemevent[1]) > amount then
                     customizable.onEvent()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     customizable.onSeed()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot().gem_count >= mingems and buypack then
                     customizable.buying()
                     customizable.onPack()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
             end
         else
@@ -935,6 +942,7 @@ customizable.recheckingWorld = function(threads)
                         print("["..pcallBot.."]Rechecking")
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     end
                     if getBot():getInventory():getItemCount(block) > amountblock then
                         if recycle then
@@ -945,6 +953,7 @@ customizable.recheckingWorld = function(threads)
                             customizable.warp(threads,doorfarmList,delaywarp)
                             customizable.initializeBots()
                         end
+                        goto BACK
                     end
                     if autoSwitch and getBot().level >= switchOnLevel then
                         if getBot():getInventory():getItemCount(block) > 0 then
@@ -956,23 +965,27 @@ customizable.recheckingWorld = function(threads)
                         customizable.onBackup()
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     end
                     if getBot():getInventory():getItemCount(itemevent[1]) > amount then
                         customizable.onEvent()
                         print("["..pcallBot.."]Rechecking")
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     elseif getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                         customizable.onSeed()
                         print("["..pcallBot.."]Rechecking")
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     elseif getBot().gem_count >= mingems and buypack then
                         customizable.buying()
                         customizable.onPack()
                         print("["..pcallBot.."]Rechecking")
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     end
                 end
             end
@@ -995,23 +1008,27 @@ customizable.recheckingWorld = function(threads)
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
                     end
+                    goto BACK
                 end
                 if getBot():getInventory():getItemCount(itemevent[1]) > amount then
                     customizable.onEvent()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     customizable.onSeed()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot().gem_count >= mingems and buypack then
                     customizable.buying()
                     customizable.onPack()
                     print("["..pcallBot.."]Rechecking")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
             end
         end
@@ -1019,6 +1036,7 @@ customizable.recheckingWorld = function(threads)
 end
 
 customizable.harvestWorld = function(threads)
+    ::BACK::
     print("["..pcallBot.."]Harvest")
     if not multiplebot then
         for idx, tile in ipairs(getBot():getWorld():getTiles()) do
@@ -1042,6 +1060,7 @@ customizable.harvestWorld = function(threads)
                 print("["..pcallBot.."]Harvest")
                 customizable.warp(threads,doorfarmList,delaywarp)
                 customizable.initializeBots()
+                goto BACK
             end
             if getBot():getInventory():getItemCount(block) >= amountblock then
                 if recycle then
@@ -1052,6 +1071,7 @@ customizable.harvestWorld = function(threads)
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
                 end
+                goto BACK
             end
             if autoSwitch and getBot().level >= switchOnLevel then
                 if getBot():getInventory():getItemCount(block) > 0 then
@@ -1063,23 +1083,27 @@ customizable.harvestWorld = function(threads)
                 customizable.onBackup()
                 customizable.warp(threads,doorfarmList,delaywarp)
                 customizable.initializeBots()
+                goto BACK
             end
             if getBot():getInventory():getItemCount(itemevent[1]) > amount then
                 customizable.onEvent()
                 print("["..pcallBot.."]Harvest")
                 customizable.warp(threads,doorfarmList,delaywarp)
                 customizable.initializeBots()
+                goto BACK
             elseif getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                 customizable.onSeed()
                 print("["..pcallBot.."]Harvest")
                 customizable.warp(threads,doorfarmList,delaywarp)
                 customizable.initializeBots()
+                goto BACK
             elseif getBot().gem_count >= mingems and buypack then
                 customizable.buying()
                 customizable.onPack()
                 print("["..pcallBot.."]Harvest")
                 customizable.warp(threads,doorfarmList,delaywarp)
                 customizable.initializeBots()
+                goto BACK
             end
         end
     else
@@ -1105,6 +1129,7 @@ customizable.harvestWorld = function(threads)
                     print("["..pcallBot.."]Harvest")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
                 if getBot():getInventory():getItemCount(block) > amountblock then
                     if recycle then
@@ -1114,6 +1139,7 @@ customizable.harvestWorld = function(threads)
                         print("["..pcallBot.."]Harvest")
                         customizable.warp(threads,doorfarmList,delaywarp)
                         customizable.initializeBots()
+                        goto BACK
                     end
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
@@ -1126,23 +1152,27 @@ customizable.harvestWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
                 if getBot():getInventory():getItemCount(itemevent[1]) > amount then
                     customizable.onEvent()
                     print("["..pcallBot.."]Harvest")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     customizable.onSeed()
                     print("["..pcallBot.."]Harvest")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 elseif getBot().gem_count >= mingems and buypack then
                     customizable.buying()
                     customizable.onPack()
                     print("["..pcallBot.."]Harvest")
                     customizable.warp(threads,doorfarmList,delaywarp)
                     customizable.initializeBots()
+                    goto BACK
                 end
             end
         end
