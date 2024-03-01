@@ -995,8 +995,6 @@ customizable.recheckingWorld = function(threads)
     tileB = 0
     tileC = -1
     tileD = 0
-    ::BACK::
-    getBot().auto_collect = true
     print("["..pcallBot.."]Rechecking")
     if not multiplebot then
         for y = -1, 53 do
@@ -1019,7 +1017,7 @@ customizable.recheckingWorld = function(threads)
                     end
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(block) > amountblock then
                     getBot().auto_collect = false
@@ -1030,7 +1028,7 @@ customizable.recheckingWorld = function(threads)
                         customizable.warp(threads,doorfarmList)
                         customizable.initializeBots()
                     end
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
                     getBot().auto_collect = false
@@ -1043,28 +1041,28 @@ customizable.recheckingWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if customizable.detectTable(itemevent,amount) then
                     getBot().auto_collect = false
                     customizable.onEvent()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     getBot().auto_collect = false
                     customizable.onSeed()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 elseif getBot().gem_count >= mingems and buypack then
                     getBot().auto_collect = false
                     customizable.buying()
                     customizable.onPack()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
             end
         end
@@ -1089,7 +1087,7 @@ customizable.recheckingWorld = function(threads)
                     end
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(block) > amountblock then
                     getBot().auto_collect = false
@@ -1100,7 +1098,7 @@ customizable.recheckingWorld = function(threads)
                         customizable.warp(threads,doorfarmList)
                         customizable.initializeBots()
                     end
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
                     getBot().auto_collect = false
@@ -1113,28 +1111,28 @@ customizable.recheckingWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if customizable.detectTable(itemevent,amount) then
                     getBot().auto_collect = false
                     customizable.onEvent()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     getBot().auto_collect = false
                     customizable.onSeed()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 elseif getBot().gem_count >= mingems and buypack then
                     getBot().auto_collect = false
                     customizable.buying()
                     customizable.onPack()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
             end
             if tileD == 1 then
@@ -1170,28 +1168,28 @@ customizable.recheckingWorld = function(threads)
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
                 end
-                goto BACK
+                getBot().auto_collect = true
             end
             if customizable.detectTable(itemevent,amount) then
                 getBot().auto_collect = false
                 customizable.onEvent()
                 customizable.warp(threads,doorfarmList)
                 customizable.initializeBots()
-                goto BACK
+                getBot().auto_collect = true
             end
             if getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                 getBot().auto_collect = false
                 customizable.onSeed()
                 customizable.warp(threads,doorfarmList)
                 customizable.initializeBots()
-                goto BACK
+                getBot().auto_collect = true
             elseif getBot().gem_count >= mingems and buypack then
                 getBot().auto_collect = false
                 customizable.buying()
                 customizable.onPack()
                 customizable.warp(threads,doorfarmList)
                 customizable.initializeBots()
-                goto BACK
+                getBot().auto_collect = true
             end
         end
     end
@@ -1264,9 +1262,7 @@ customizable.harvestWorld = function(threads)
     tileB = 0
     tileC = -1
     tileD = 0
-    ::BACK::
     print("["..pcallBot.."]Harvest")
-    getBot().auto_collect = true
     if not multiplebot then
         for y = 3, 53, increment do
             for x = tileA, tileB, tileC do
@@ -1284,7 +1280,7 @@ customizable.harvestWorld = function(threads)
                     end
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(block) > amountblock then
                     getBot().auto_collect = false
@@ -1295,7 +1291,7 @@ customizable.harvestWorld = function(threads)
                         customizable.warp(threads,doorfarmList)
                         customizable.initializeBots()
                     end
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
                     getBot().auto_collect = false
@@ -1308,28 +1304,28 @@ customizable.harvestWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if customizable.detectTable(itemevent,amount) then
                     getBot().auto_collect = false
                     customizable.onEvent()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     getBot().auto_collect = false
                     customizable.onSeed()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 elseif getBot().gem_count >= mingems and buypack then
                     getBot().auto_collect = false
                     customizable.buying()
                     customizable.onPack()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
             end
         end
@@ -1354,7 +1350,7 @@ customizable.harvestWorld = function(threads)
                     end
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(block) > amountblock then
                     getBot().auto_collect = false
@@ -1365,7 +1361,7 @@ customizable.harvestWorld = function(threads)
                         customizable.warp(threads,doorfarmList)
                         customizable.initializeBots()
                     end
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if autoSwitch and getBot().level >= switchOnLevel then
                     getBot().auto_collect = false
@@ -1378,28 +1374,28 @@ customizable.harvestWorld = function(threads)
                     customizable.onBackup()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if customizable.detectTable(itemevent,amount) then
                     getBot().auto_collect = false
                     customizable.onEvent()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
                 if getBot():getInventory():getItemCount(customizable.seed) > amountseed then
                     getBot().auto_collect = false
                     customizable.onSeed()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 elseif getBot().gem_count >= mingems and buypack then
                     getBot().auto_collect = false
                     customizable.buying()
                     customizable.onPack()
                     customizable.warp(threads,doorfarmList)
                     customizable.initializeBots()
-                    goto BACK
+                    getBot().auto_collect = true
                 end
             end
             if tileD == 1 then
@@ -1591,7 +1587,7 @@ if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : ht
                         if not wrong then
                             local formTime = os.time()
                             customizable.harvestWorld(value)
-                            for i = 1, 2 do
+                            for i = 1, 3 do
                                 customizable.recheckingWorld(value)
                             end
                             local formattedTime = os.time() - formTime
@@ -1635,7 +1631,7 @@ if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : ht
                         if not wrong then
                             local formTime = os.time()
                             customizable.harvestWorld(value)
-                            for i = 1, 2 do
+                            for i = 1, 3 do
                                 customizable.recheckingWorld(value)
                             end
                             local formattedTime = os.time() - formTime
