@@ -996,6 +996,7 @@ customizable.recheckingWorld = function(threads)
     tileC = -1
     tileD = 0
     print("["..pcallBot.."]Rechecking")
+    getBot().auto_collect = true
     if not multiplebot then
         for y = -1, 53 do
             for x = tileA, tileB, tileC do
@@ -1263,6 +1264,7 @@ customizable.harvestWorld = function(threads)
     tileC = -1
     tileD = 0
     print("["..pcallBot.."]Harvest")
+    getBot().auto_collect = true
     if not multiplebot then
         for y = 3, 53, increment do
             for x = tileA, tileB, tileC do
