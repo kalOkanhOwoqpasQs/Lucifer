@@ -1370,16 +1370,16 @@ if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : ht
                 local formattedTime = os.time() - formTime
                 initialize[world] = math.floor(formattedTime/60).." Minutes"
             else
-                customizable.writeFile("("..value..") is wrong id")
+                customizable.writeFile("("..world..") is wrong id")
                 wrong = false
-                print("["..pcallBot.."]"..value.." is wrong door id, skipped world")
-                customizable.botStatics("("..value..") is wrong door id, skipped world","Script Status : Running")
+                print("["..pcallBot.."]"..world.." is wrong door id, skipped world")
+                customizable.botStatics("("..world..") is wrong door id, skipped world","Script Status : Running")
             end
         else
-            customizable.writeFile("("..value..") is NUKED !!")
+            customizable.writeFile("("..world..") is NUKED !!")
             nuked = false
-            print("["..pcallBot.."]"..value.." is NUKED!, check ur world !!")
-            customizable.botStatics("("..value..") is NUKED!, check ur world !!","Script Status : Running")
+            print("["..pcallBot.."]"..world.." is NUKED!, check ur world !!")
+            customizable.botStatics("("..world..") is NUKED!, check ur world !!","Script Status : Running")
         end
     end
     customizable.botStatics("("..getBot().name..") Already finished all world, Terminated script!","Script Status : Stopped, Reason : Already finished all world")
