@@ -110,7 +110,6 @@ local split = #assign / #getBots()
 local start = math.floor(index * split + 1)
 local stop = math.floor(index + 1) * split
 
-
 customizable.itemRecycle = function()
     if getBot():getInventory():getItemCount(block) > 0 then
         getBot():sendPacket(2,"action|trash\n|itemID|"..block)
@@ -319,10 +318,10 @@ customizable.warp = function(world,door)
             end
             getBot():warp(name)
             listenEvents(3)
+            sleep(delaywarp * 1000)
             count = count + 1
-            if count < 5 then
-                sleep(delaywarp * 1000)
-            else
+            if count == 5 then
+                count = 0
                 sleep(delayidiotserver * 60000)
             end
         end
