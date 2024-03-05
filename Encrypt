@@ -122,7 +122,7 @@ end
 
 customizable.hitFarmable = function(x,y,str)
     for _,idx in pairs(botTile) do
-        if getTile(x + idx,y + str).fg == customizable.seed and getTile(x + idx,y + str):canHarvest() then
+        if getTile(x + idx,y + str).fg == customizable.seed and getTile(x + idx,y + str):canHarvest() and getBot():getWorld():hasAccess(x + idx,y + str) ~= 0 and not getTile(x + idx,y + str):hasFlag(4096) then
             return true
         end
     end
@@ -216,93 +216,30 @@ customizable.initializeBots = function()
 	if linkbotinfo ~= "x" then
         realtime = os.time() - customizable.formatTime
         for idx, val in pairs(reversed) do
-            local text = [[
-                $webHookUrl = "]]..linkbotinfo..[[/messages/]]..val..[["
-                $payload = @{
-                    username = "Caramoy's"
-                    embeds = @(
-                        @{
-                            title = "Caramoy Syndicate : https://discord.com/invite/fTTKW8vvuq"
-                            color = "]]..math.random(111111,999999)..[["
-                            fields = @(
-                                @{
-                                    name = "Information"
-                                    value = "]].."Botname : ["..getBot().level.."]"..string.upper(getBot().name).."\nGems : "..getBot().gem_count.."\nCurrent : "..string.upper(getBot():getWorld().name).."\nStatus : "..customizable.initBot().."\nRuntime : "..math.floor(realtime/86400).." Days "..math.floor(realtime%86400/3600).." Hours "..math.floor(realtime%86400%3600/60).." Minutes"..[["
-                                    inline = "false"
-                                }
-                                @{
-                                    name = "Storage Block"
-                                    value = "]]..customizable.initBlock()..[["
-                                    inline = "true"
-                                }
-                                @{
-                                    name = "Storage Seed"
-                                    value = "]]..customizable.initSeed()..[["
-                                    inline = "true"
-                                }
-                                @{
-                                    name = "Storage Pack & Event"
-                                    value = "]]..customizable.initPackEvent()..[["
-                                    inline = "true"
-                                }
-                                @{
-                                    name = "Farm Estimates"
-                                    value = "]]..customizable.initOnFarm()..[["
-                                    inline = "true"
-                                }
-                                @{
-                                    name = "Bot Switch"
-                                    value = "]]..customizable.initOnSwitch()..[["
-                                    inline = "true"
-                                }
-                            )
-                            footer = @{
-                                text = "[Lucifer] : Harvest Script`nLast update : ]]..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..[["
-                            }
-                        }
-                    )
-                }
-                
-                [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-                Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Patch -ContentType 'application/json'
-            ]]
-            local pipe = io.popen("powershell -command -", "w")
-            pipe:write(text)
-            pipe:close()
-        end
+            local webhook = Webhook.new(linkbotinfo)
+            webhook.embed1.use = true
+            webhook.embed1.title = "Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]"
+            webhook.embed1.color = math.random(111111,999999)
+            webhook.embed1:addField("Information","Botname : ["..getBot().level.."]"..string.upper(getBot().name).."\nGems : "..getBot().gem_count.."\nCurrent : "..string.upper(getBot():getWorld().name).."\nStatus : "..customizable.initBot().."\nRuntime : "..math.floor(realtime/86400).." Days "..math.floor(realtime%86400/3600).." Hours "..math.floor(realtime%86400%3600/60).." Minutes",false)
+            webhook.embed1:addField("BLOCK",customizable.initBlock(),true)
+            webhook.embed1:addField("SEED",customizable.initSeed(),true)
+            webhook.embed1:addField("PACK & EVENT",customizable.initPackEvent(),true)
+            webhook.embed1:addField("Farm Estimates",customizable.initOnFarm(),true)
+            webhook.embed1:addField("Bot Switch",customizable.initOnSwitch(),true)
+            webhook.embed1.footer.text = "[Lucifer] : Harvest Script\nLast update : "..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..""
+            webhook:edit(val)
+        end    
     end
 end
 
 customizable.botStatics = function(text,execution)
     if webhookstatuslink ~= "x"  then
-        text = [[
-            $webHookUrl = "]]..webhookstatuslink..[["
-            $payload = @{
-                username = "Caramoy's"
-                "content" = "@everyone"
-                embeds = @(
-                    @{
-                        color = "]]..math.random(111111,999999)..[["
-                        fields = @(
-                            @{
-                                name = ""
-                                value = "]]..text..[["
-                                inline = "false"
-                            }
-                        )
-                        footer = @{
-                            text = "]]..execution..[["
-                        }
-                    }
-                )
-            }
-            
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-RestMethod -Uri $webHookUrl -Body ($payload | ConvertTo-Json -Depth 4) -Method Post -ContentType "application/json"
-        ]]
-        local file = io.popen("powershell -command -", "w")
-        file:write(text)
-        file:close()
+        local webhook = Webhook.new(webhookstatuslink)
+        webhook.content = "@everyone"
+        webhook.embed1.use = true
+        webhook.embed1:addField("",text,false)
+        webhook.embed1.footer.text = execution
+        webhook:send()
     end
 end
 
@@ -964,12 +901,13 @@ customizable.recheckingWorld = function(threads)
                 sleep(30)
                 customizable.reconnect(threads,door,x,y)
                 count = 0
-                while getTile(x,y).fg == customizable.seed do
+                while getTile(x,y).fg == customizable.seed and getBot():getWorld():hasAccess(x,y) ~= 0 and not getTile(x,y):hasFlag(4096) do
                     getBot():hit(x,y)
                     sleep(delayharvest)
                     customizable.reconnect(threads,door,x,y)
                     count = count + 1
-                    if count == 5 then
+                    if count == 15 then
+                        count = 0
                         break
                     end
                 end
@@ -1093,40 +1031,43 @@ customizable.pattern = function(world,id)
     count = 0
     while customizable.hitFarmable(botX,botY,-2) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY - 2).fg == customizable.seed and getTile(botX + i,botY - 2):canHarvest() then
+            if getTile(botX + i,botY - 2).fg == customizable.seed and getBot():getWorld():hasAccess(botX + i,botY - 2) ~= 0 and not getTile(botX + i,botY - 2):hasFlag(4096) then
                 getBot():hit(botX + i,botY - 2)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 15 then
+        if count == 50 then
+            count = 0
             break
         end
     end
     while customizable.hitFarmable(botX,botY,0) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY).fg == customizable.seed and getTile(botX + i,botY):canHarvest() then
+            if getTile(botX + i,botY).fg == customizable.seed and getTile(botX + i,botY):canHarvest() and getBot():getWorld():hasAccess(botX+i,botY) ~= 0 and not getTile(botX+i,botY):hasFlag(4096) then
                 getBot():hit(botX + i,botY)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 15 then
+        if count == 50 then
+            count = 0
             break
         end
     end
     while customizable.hitFarmable(botX,botY,2) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY+2).fg == customizable.seed and getTile(botX + i,botY+2):canHarvest() then
+            if getTile(botX + i,botY+2).fg == customizable.seed and getTile(botX + i,botY+2):canHarvest() and getBot():getWorld():hasAccess(botX+i,botY + 2) ~= 0 and not getTile(botX+i,botY + 2):hasFlag(4096) then
                 getBot():hit(botX + i,botY+2)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 15 then
+        if count == 50 then
+            count = 0
             break
         end
     end
