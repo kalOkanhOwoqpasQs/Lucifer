@@ -4,6 +4,9 @@ for i, bot in pairs(getBots()) do
     end
 end
 
+bot = getBot()
+inventory = getBot():getInventory()
+strFormatted = 'None'
 botBackup = {}
 initialize = {}
 reversed = {}
@@ -33,22 +36,21 @@ local customizable = {
     eventY = dropeventY -1
 }
 local increment = 1 * 2 * 3
-identity = 5
-getBot().legit_mode = false
-getBot().move_range = moveRange
-getBot().move_interval = moveInterval
-getBot().auto_reconnect = false
-getBot().collect_range = range
+bot.legit_mode = false
+bot.move_range = moveRange
+bot.move_interval = moveInterval
+bot.auto_reconnect = false
+bot.collect_range = range
 
 customizable.notifications = function(desc)
     messageBox = MessageBox.new()
-    messageBox.title = "Caramoy Syndicate"
+    messageBox.title = 'Caramoy Syndicate'
     messageBox.description = desc
     messageBox:send()
 end
 
 if ignoregems then
-    getBot().ignore_gems = true
+    bot.ignore_gems = true
 end
 
 for i =  1,customizable.indexMessage do
@@ -66,9 +68,9 @@ end
 
 local function readFile(fileName)
     local assign = {}
-    local file = io.open(fileName, "r")
+    local file = io.open(fileName, 'r')
     if not file then
-        customizable.notifications("Fail to open file world.")
+        customizable.notifications('Fail to open file world.')
         return nil
     else
         for line in file:lines() do
@@ -81,9 +83,9 @@ end
 
 local function readSwitch(fileName)
     local onInitSwitch = {}
-    local file = io.open(fileName, "r")
+    local file = io.open(fileName, 'r')
     if not file then
-        customizable.notifications("Fail to open file bot switch.")
+        customizable.notifications('Fail to open file bot switch.')
         return nil
     else
         for line in file:lines() do
@@ -111,17 +113,17 @@ local start = math.floor(index * split + 1)
 local stop = math.floor(index + 1) * split
 
 customizable.itemRecycle = function()
-    if getBot():getInventory():getItemCount(block) > 0 then
-        getBot():sendPacket(2,"action|trash\n|itemID|"..block)
-        sleep(1000)
-        getBot():sendPacket(2,"action|dialog_return\ndialog_name|trash_item\nitemID|" .. block .. "|\ncount|" .. getBot():getInventory():getItemCount(block))
-        sleep(1000)
+    if inventory:getItemCount(block) > 0 then
+        bot:sendPacket(2,'action|trash\n|itemID|'..block)
+        sleep(500)
+        bot:sendPacket(2,'action|dialog_return\ndialog_name|trash_item\nitemID|' .. block .. '|\ncount|' .. inventory:getItemCount(block))
+        sleep(500)
     end
 end
 
 customizable.hitFarmable = function(x,y,str)
     for _,idx in pairs(botTile) do
-        if getTile(x + idx,y + str).fg == customizable.seed and getTile(x + idx,y + str):canHarvest() and getBot():getWorld():hasAccess(x + idx,y + str) ~= 0 and not getTile(x + idx,y + str):hasFlag(4096) then
+        if getTile(x + idx,y + str).fg == customizable.seed and getTile(x + idx,y + str):canHarvest() and bot:getWorld():hasAccess(x + idx,y + str) ~= 0 and not getTile(x + idx,y + str):hasFlag(4096) then
             return true
         end
     end
@@ -130,7 +132,7 @@ end
 
 customizable.split = function(str, ptr)
     if not ptr then 
-        ptr = "%s"
+        ptr = '%s'
     end
     local tbl = {}
     for string in string.gmatch(str, ptr) do
@@ -140,219 +142,219 @@ customizable.split = function(str, ptr)
 end
 
 customizable.initBot = function()
-    if getBot().status == BotStatus.online then
-        return "Online"
-    elseif getBot().status == BotStatus.account_banned  then
-        return "Suspended"
-    elseif getBot().status == BotStatus.error_connecting  then
-        return "Ercon"
-    elseif getBot().status == BotStatus.maintenance then
-        return "Maintenance"
-    elseif getBot().status == BotStatus.changing_subserver then
-        return "Changing Subserver"
-    elseif getBot().status == BotStatus.location_banned then
-        return "Location Banned"
+    if bot.status == BotStatus.online then
+        return 'Online'
+    elseif bot.status == BotStatus.account_banned  then
+        return 'Suspended'
+    elseif bot.status == BotStatus.error_connecting  then
+        return 'Ercon'
+    elseif bot.status == BotStatus.maintenance then
+        return 'Maintenance'
+    elseif bot.status == BotStatus.changing_subserver then
+        return 'Changing Subserver'
+    elseif bot.status == BotStatus.location_banned then
+        return 'Location Banned'
     else
-        return "Disconnect"
+        return 'Disconnect'
     end
 end
 
-customizable.initOnFarm = function()
-    str = ""
-    for i = start,stop do
-        local world = customizable.split(assign[i],"[^|]+")[1]
-        str = str.."\n||"..string.upper(world).."|| ("..(initialize[world] or "?")..")"
+customizable.tableFormatted = function(time)
+    if strFormatted == 'None' then
+        strFormatted = ''
     end
-    return str
+    strFormatted = strFormatted .. time .. '\n'
 end
 
 customizable.initOnSwitch = function()
     if autoSwitch then
-        str = ""
+        str = ''
         for i = 1,#botBackup do
-            local switch = customizable.split(botBackup[i],"[^|]+")[1]
-            str = str.."\n||"..string.upper(switch).."|| ("..(initialize[switch] or "?")..")"
+            local switch = customizable.split(botBackup[i],'[^|]+')[1]
+            str = str..'\n||'..string.upper(switch)..'|| ('..(initialize[switch] or '?')..')'
         end
         return str
     else
-        return "Not using switch"
+        return 'Not using switch'
     end
 end
 
 customizable.initBlock = function()
-    str = ""
+    str = ''
 	for i = 1, #storageblock do
-        local world = customizable.split(storageblock[i],"[^|]+")[1]
-        str = str.."\n||"..string.upper(world).."|| : "..(initialize[world] or "?")..""
+        local world = customizable.split(storageblock[i],'[^|]+')[1]
+        str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
     end
     return str
 end
 
 customizable.initSeed = function()
-    str = ""
+    str = ''
 	for i = 1, #storageseed do
-        local world = customizable.split(storageseed[i],"[^|]+")[1]
-        str = str.."\n||"..string.upper(world).."|| : "..(initialize[world] or "?")..""
+        local world = customizable.split(storageseed[i],'[^|]+')[1]
+        str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
     end
     return str
 end
 
 customizable.initPackEvent = function()
-    str = ""
+    str = ''
 	for i = 1, #storagepack do
-        local world = customizable.split(storagepack[i],"[^|]+")[1]
-        str = str.."\nPack - "..i.." : "..(initialize[world] or "?")..""
+        local world = customizable.split(storagepack[i],'[^|]+')[1]
+        str = str..'\nPack - '..i..' : '..(initialize[world] or '?')..''
     end
     
 	for i = 1, #storageevent do
-        local world = customizable.split(storageevent[i],"[^|]+")[1]
-        str = str.."\nEvent - "..i.." : "..(initialize[world] or "?")..""
+        local world = customizable.split(storageevent[i],'[^|]+')[1]
+        str = str..'\nEvent - '..i..' : '..(initialize[world] or '?')..''
     end
     return str
 end
 
-customizable.initializeBots = function()
-	if linkbotinfo ~= "x" then
+customizable.localInfo = function()
+	if linkbotinfo ~= 'x' then
         realtime = os.time() - customizable.formatTime
         for idx, val in pairs(reversed) do
             local webhook = Webhook.new(linkbotinfo)
             webhook.embed1.use = true
-            webhook.embed1.title = "Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]"
+            webhook.embed2.use = true
+            webhook.embed1.title = 'Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]'
             webhook.embed1.color = math.random(111111,999999)
-            webhook.embed1:addField("Information","Botname : ["..getBot().level.."]"..string.upper(getBot().name).."\nGems : "..getBot().gem_count.."\nCurrent : "..string.upper(getBot():getWorld().name).."\nStatus : "..customizable.initBot().."\nRuntime : "..math.floor(realtime/86400).." Days "..math.floor(realtime%86400/3600).." Hours "..math.floor(realtime%86400%3600/60).." Minutes",false)
-            webhook.embed1:addField("BLOCK",customizable.initBlock(),true)
-            webhook.embed1:addField("SEED",customizable.initSeed(),true)
-            webhook.embed1:addField("PACK & EVENT",customizable.initPackEvent(),true)
-            webhook.embed1:addField("Farm Estimates",customizable.initOnFarm(),true)
-            webhook.embed1:addField("Bot Switch",customizable.initOnSwitch(),true)
-            webhook.embed1.footer.text = "[Lucifer] : Harvest Script\nLast update : "..(os.date("!%a %b %d, %Y at %I:%M %p", os.time() + 7 * 60 * 60))..""
+            webhook.embed1:addField('Information','Botname : ['..bot.level..']'..string.upper(bot.name)..'\nGems : '..bot.gem_count..'\nCurrent : '..string.upper(bot:getWorld().name)..'\nStatus : '..customizable.initBot()..'\nRuntime : '..math.floor(realtime/86400)..' Days '..math.floor(realtime%86400/3600)..' Hours '..math.floor(realtime%86400%3600/60)..' Minutes',false)
+            webhook.embed1:addField('BLOCK',customizable.initBlock(),true)
+            webhook.embed1:addField('SEED',customizable.initSeed(),true)
+            webhook.embed1:addField('PACK & EVENT',customizable.initPackEvent(),true)
+            webhook.embed2:addField('Farm Estimates',strFormatted,true)
+            webhook.embed2:addField('Bot Switch',customizable.initOnSwitch(),true)
+            webhook.embed2.footer.text = '[Lucifer] : Harvest Script\nLast update : '..(os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60))..''
             webhook:edit(val)
         end    
     end
 end
 
-customizable.botStatics = function(text,execution)
-    if webhookstatuslink ~= "x"  then
+customizable.initializeBots = function(text)
+    if webhookstatuslink ~= 'x'  then
         local webhook = Webhook.new(webhookstatuslink)
-        webhook.content = "@everyone"
+        webhook.content = '@everyone'
         webhook.embed1.use = true
-        webhook.embed1:addField("",text,false)
-        webhook.embed1.footer.text = execution
+        webhook.embed1:addField('',text,false)
+        webhook.embed1.footer.text = 'Webhook Status, sent at : '..(os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60))..''
         webhook:send()
     end
 end
 
 customizable.reconnect = function(world,id,x,y)
-    if getBot().status == BotStatus.online and getBot():getPing() == 0 then
-        getBot():disconnect()
+    if bot.status == BotStatus.online and bot:getPing() == 0 then
+        bot:disconnect()
         sleep(2000)
     end
-    if not getBot():isInWorld(world:upper()) or getBot().status ~= BotStatus.online then
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
-        while getBot().status ~= BotStatus.online do
-            getBot():connect()
-            if getBot().status == BotStatus.account_banned then
-                customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Stopped, Reason : Bot status "..customizable.initBot().."")
-                getBot():stopScript()
+    if not bot:isInWorld(world:upper()) or bot.status ~= BotStatus.online then
+        customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..' Current : '..getWorld().name..'')
+        while bot.status ~= BotStatus.online do
+            bot:connect()
+            if bot.status == BotStatus.account_banned then
+                customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..', Script terminated.')
+                bot:stopScript()
             end
-            if getBot().status == BotStatus.maintenance then
+            if bot.status == BotStatus.maintenance then
                 sleep(delaymaintenance * 60000)
             else
                 sleep(delayreconnect * 1000)
             end
         end
-        while not getBot():isInWorld(world:upper()) do
-            getBot():warp(world:upper())
+        while not bot:isInWorld(world:upper()) do
+            bot:warp(world:upper())
             sleep(delaywarp * 1000)
         end
-        if id ~= "" then
-            while getTile(getBot().x,getBot().y).fg == 6 do
-                getBot():warp(world:upper(),id:upper())
+        if id ~= '' then
+            while getTile(bot.x,bot.y).fg == 6 do
+                bot:warp(world:upper(),id:upper())
                 sleep(delaywarp * 1000)
             end
         end
         if x and y then
-            while getBot().x ~= x or getBot().y ~= y do
-                getBot():findPath(x,y)
+            while bot.x ~= x or bot.y ~= y do
+                bot:findPath(x,y)
                 sleep(150)
             end
         end
-        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().." Current : "..getWorld().name.."","Status Script : Running")
+        customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..' Current : '..getWorld().name..'')
     end
 end
 
 customizable.warp = function(world,door)
     name = world
-    if door ~= "" then
-        name = name .. "|" ..door
+    if door ~= '' then
+        name = name .. '|' ..door
     end
-    if not getBot():isInWorld(world:upper()) then
+    if not bot:isInWorld(world:upper()) then
         local count = 0
         addEvent(Event.variantlist, function(variant, netid)
-            if variant:get(0):getString() == "OnConsoleMessage" then
-                if variant:get(1):getString():lower():find("inaccessible.") or variant:get(1):getString():lower():find("unknown reason.") then
+            if variant:get(0):getString() == 'OnConsoleMessage' then
+                if variant:get(1):getString():lower():find('inaccessible.') or variant:get(1):getString():lower():find('unknown reason.') then
                     nuked = true
                 end
             end
         end)
-        while not getBot():isInWorld(world:upper()) and not nuked do
-            if getBot().status == BotStatus.online and getBot():getPing() == 0 then
-                getBot():disconnect()
+        while not bot:isInWorld(world:upper()) and not nuked do
+            if bot.status == BotStatus.online and bot:getPing() == 0 then
+                bot:disconnect()
                 sleep(2000)
             end
-            if getBot().status ~= BotStatus.online then
-                customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
-                while getBot().status ~= BotStatus.online do
-                    getBot():connect()
-                    if getBot().status == BotStatus.account_banned then
-                        customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Stopped, Reason : Bot status "..customizable.initBot().."")
-                        getBot():stopScript()
+            if bot.status ~= BotStatus.online then
+                customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..'')
+                while bot.status ~= BotStatus.online do
+                    bot:connect()
+                    if bot.status == BotStatus.account_banned then
+                        customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..', Script terminated')
+                        bot:stopScript()
                     end
-                    if getBot().status == BotStatus.maintenance then
+                    if bot.status == BotStatus.maintenance then
                         sleep(delaymaintenance * 60000)
                     else
                         sleep(delayreconnect * 1000)
                     end
                 end
-                customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
+                customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..'')
             end
-            getBot():warp(name)
-            listenEvents(3)
-            sleep(delaywarp * 1000)
+            bot:warp(name)
+            listenEvents(delaywarp)
             count = count + 1
             if count == 5 then
                 count = 0
+                customizable.initializeBots(''..bot.name..' : Maybe hard warp?, disconnecting bot and sleeping for '..delayidiotserver..' minutes')
+                bot:disconnect()
                 sleep(delayidiotserver * 60000)
             end
         end
         removeEvents()
         sleep(1000)
     end
-    if getBot():isInWorld(world:upper()) then
-        if door ~= "" then
+    if bot:isInWorld(world:upper()) then
+        if door ~= '' then
             local stuck = 0
-            while getTile(getBot().x,getBot().y).fg == 6 and not wrong do
-                if getBot().status == BotStatus.online and getBot():getPing() == 0 then
-                    getBot():disconnect()
+            while getTile(bot.x,bot.y).fg == 6 and not wrong do
+                if bot.status == BotStatus.online and bot:getPing() == 0 then
+                    bot:disconnect()
                     sleep(2000)
                 end
-                if getBot().status ~= BotStatus.online then
-                    customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
-                    while getBot().status ~= BotStatus.online do
-                        getBot():connect()
-                        if getBot().status == BotStatus.account_banned then
-                            customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Stopped, Reason : Bot status "..customizable.initBot().."")
-                            getBot():stopScript()
+                if bot.status ~= BotStatus.online then
+                    customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..'')
+                    while bot.status ~= BotStatus.online do
+                        bot:connect()
+                        if bot.status == BotStatus.account_banned then
+                            customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..', Script terminated.')
+                            bot:stopScript()
                         end
-                        if getBot().status == BotStatus.maintenance then
+                        if bot.status == BotStatus.maintenance then
                             sleep(delaymaintenance * 60000)
                         else
                             sleep(delayreconnect * 1000)
                         end
                     end
-                    customizable.botStatics(""..getBot().name.." status is "..customizable.initBot().."","Status Script : Running")
+                    customizable.initializeBots(''..bot.name..' status is '..customizable.initBot()..'')
                 end
-                getBot():warp(name)
+                bot:warp(name)
                 sleep(delaywarp * 1000)
                 stuck = stuck + 1
                 if stuck == 5 then
@@ -364,27 +366,28 @@ customizable.warp = function(world,door)
 end
 
 customizable.itemFloat = function(id)
-    return getBot():getWorld().growscan:getObjects()[id] or 0
+    return bot:getWorld().growscan:getObjects()[id] or 0
 end
 
 customizable.joinRandom = function()
-    print("["..pcallBot.."]Clearing history")
+    print(pcallBot..'. Clearing history')
     for idx, value in ipairs(worldclearhistory) do
-        customizable.warp(value,"")
+        customizable.warp(value,'')
         if not nuked then
-            customizable.reconnect(value,"")
+            customizable.reconnect(value,'')
         else
             nuked = false
-            customizable.botStatics("World clearing history has nuked or higher level!!, change ur world history list","Script Status : Stopped, Reason : World clearing history has nuked or higher level")
-            customizable.notifications("["..pcallBot.."]World clearing history has nuked or higher level!!, change ur world history list")
-            getBot():stopScript()
+            print(pcallBot..'. World clearing history has nuked, Script terminated.')
+            customizable.initializeBots('World clearing history has nuked, Script terminated.')
+            customizable.notifications(pcallBot..'. World clearing history has nuked, Script terminated.')
+            bot:stopScript()
         end
     end
 end
 
 customizable.detectTable = function(items,amt)
     for _, init in pairs(items) do
-        if getBot():getInventory():getItemCount(init) >= amt then
+        if inventory:getItemCount(init) >= amt then
             return true
         end
     end
@@ -392,15 +395,18 @@ customizable.detectTable = function(items,amt)
 end
 
 customizable.buying = function()
-    print("["..pcallBot.."]Buying packs")
+    print(pcallBot..'. Buying packs')
     if upbackpack then
-        while getBot():getInventory().slotcount < 36 do
-            getBot():sendPacket(2,"action|buy\nitem|upgrade_backpack")
-            sleep(1000)
+        if inventory.slotcount < 36 then
+            print(pcallBot..'. Upgrading backpacks')
+            repeat
+                bot:sendPacket(2,'action|buy\nitem|upgrade_backpack')
+                sleep(1000)
+            until inventory.slotcount >= 36
         end
     end
-    while getBot().gem_count >= pricepack do
-        getBot():sendPacket(2,"action|buy\nitem|"..debug)
+    while bot.gem_count >= pricepack do
+        bot:sendPacket(2,'action|buy\nitem|'..debug)
         sleep(1000)
         if customizable.detectTable(packList,200) then
             break
@@ -410,39 +416,40 @@ end
 
 customizable.onEvent = function()
     for i = customizable.variableEvent , #storageevent do
-        print("["..pcallBot.."]Dropping events")
-        world = customizable.split(storageevent[i],"[^|]+")[1]
-        door = customizable.split(storageevent[i],"[^|]+")[2]
+        print(pcallBot..'. Dropping events')
+        world = customizable.split(storageevent[i],'[^|]+')[1]
+        door = customizable.split(storageevent[i],'[^|]+')[2]
         customizable.warp(world,door)
-        customizable.initializeBots()
         if not nuked then
             if not wrong then
+                customizable.localInfo()
                 if customizable.itemFloat(eventList[1]) >= limitevent then
-                    initialize[world] = ""..customizable.itemFloat(eventList[1]).."x (LIMIT)"
-                    customizable.botStatics("Events storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
-                    print("["..pcallBot.."]Events storage : "..world.." has reached limit, skipped world")
+                    initialize[world] = customizable.itemFloat(eventList[1])..'x (LIMIT)'
+                    customizable.initializeBots('Storage event : '..world..' has reached limit, skipped world')
+                    print(pcallBot..'. Storage event : '..world..' has reached limit, skipped world')
                     customizable.variableEvent = customizable.variableEvent + 1
                     customizable.indexEvent = 0
                     if customizable.variableEvent > #storageevent then
-                        initialize[world] = ""..customizable.itemFloat(eventList[1]).."x (LIMIT)"
-                        customizable.botStatics("All events storage has reached limit","Status Script : Stopped, Reason : All events storage has reached limit")
-                        customizable.initializeBots()
+                        initialize[world] = customizable.itemFloat(eventList[1])..'x (LIMIT)'
+                        print('All events storage has reached limit, Script terminated')
+                        customizable.initializeBots('All events storage has reached limit, Script terminated')
                         if removingbot then
                             removeBot()
                             sleep(2000)
                         else
-                            customizable.warp(customizable.randomLetter(),"")
+                            customizable.warp(customizable.randomLetter(),'')
                         end
-                        customizable.notifications("["..pcallBot.."]All events storage has reached limit")
-                        getBot():stopScript()
+                        customizable.localInfo()
+                        customizable.notifications(pcallBot..'. All events storage has reached limit')
+                        bot:stopScript()
                     end
                 else
                     for y,pack in pairs(eventList) do
-                        for i,tile in pairs(getBot():getWorld():getTiles()) do
+                        for i,tile in pairs(bot:getWorld():getTiles()) do
                             if separated then
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
-                                    getBot():findPath(customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
+                                    bot:findPath(customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
                                     sleep(100)
                                     local count = 0
                                     customizable.reconnect(world,door,customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
@@ -450,10 +457,10 @@ customizable.onEvent = function()
                                         customizable.eventY = customizable.eventY - 1
                                         customizable.indexEvent = 0
                                     end
-                                    while getBot():getInventory():getItemCount(pack) > 0 do
-                                        getBot():setDirection(true)
+                                    while inventory:getItemCount(pack) > 0 do
+                                        bot:setDirection(true)
                                         sleep(30)
-                                        getBot():drop(pack,200)
+                                        bot:drop(pack,200)
                                         sleep(delaydrop * 1000)
                                         customizable.reconnect(world,door,customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
                                         count = count + 1
@@ -463,13 +470,13 @@ customizable.onEvent = function()
                                         end
                                     end
                                 end
-                                if getBot():getInventory():getItemCount(pack) == 0 then
+                                if inventory:getItemCount(pack) == 0 then
                                     break
                                 end
                             else
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
-                                    getBot():findPath(customizable.eventX + (customizable.indexEvent),customizable.eventY)
+                                    bot:findPath(customizable.eventX + (customizable.indexEvent),customizable.eventY)
                                     sleep(100)
                                     local count = 0
                                     customizable.reconnect(world,door,customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
@@ -477,10 +484,10 @@ customizable.onEvent = function()
                                         customizable.eventY = customizable.eventY - 1
                                         customizable.indexEvent = 0
                                     end
-                                    while getBot():getInventory():getItemCount(pack) > 0 do
-                                        getBot():setDirection(true)
+                                    while inventory:getItemCount(pack) > 0 do
+                                        bot:setDirection(true)
                                         sleep(30)
-                                        getBot():drop(pack,200)
+                                        bot:drop(pack,200)
                                         sleep(delaydrop * 1000)
                                         customizable.reconnect(world,door,customizable.eventX + (customizable.indexEvent),customizable.eventY - (y - 1))
                                         count = count + 1
@@ -490,7 +497,7 @@ customizable.onEvent = function()
                                         end
                                     end
                                 end
-                                if getBot():getInventory():getItemCount(pack) == 0 then
+                                if inventory:getItemCount(pack) == 0 then
                                     break
                                 end
                             end
@@ -499,45 +506,49 @@ customizable.onEvent = function()
                     break
                 end
             else
-                initialize[world] = "WRONG DOOR"
+                initialize[world] = 'Wrong door'
                 wrong = false
-                print("["..pcallBot.."]("..world..") Id door events storage is wrong, check ur id door!")
-                customizable.botStatics("||"..world.."|| Id door events storage is wrong, check ur id door","Status Script : Running")
+                print(pcallBot..'. Storage event : '..world..' are wrong door id, skipped world')
+                customizable.initializeBots('Storage event : '..world..' are wrong door id, skipped world')
                 customizable.variableEvent = customizable.variableEvent + 1
                 customizable.indexEvent = 0
                 if customizable.variableEvent > #storageevent then
-                    customizable.botStatics("All events storage has reached limit!","Status Script : Stopped, Reason : All events storage has reached limit")
+                    customizable.initializeBots('All events storage has reached limit, Script terminated.')
+                    print('All events storage has reached limit, Script terminated.')
                     if removingbot then
                         removeBot()
                         sleep(2000)
                     else
-                        customizable.warp(customizable.randomLetter(),"")
+                        customizable.warp(customizable.randomLetter(),'')
                     end
-                    customizable.notifications("["..pcallBot.."]All events storage has reached limit")
-                    getBot():stopScript()
+                    customizable.localInfo()
+                    customizable.notifications(pcallBot..'. All events storage has reached limit')
+                    bot:stopScript()
                 end
             end
         else
-            initialize[world] = "NUKED"
+            initialize[world] = 'Nuked'
             nuked = false
-            print("["..pcallBot.."]("..world..") event Storage is NUKED, check ur storage!")
-            customizable.botStatics("||"..world.."|| event Storage is NUKED, check ur storage","Status Script : Running")
+            print(pcallBot..'. Storage event : '..world..' are Nuked, skipped world')
+            customizable.initializeBots('Storage event : '..world..' are Nuked, skipped world')
             customizable.variableEvent = customizable.variableEvent + 1
             customizable.indexEvent = 0
             if customizable.variableEvent > #storageevent then
-                customizable.botStatics("All events storage has reached limit!","Status Script : Stopped, Reason : All events storage has reached limit")
+                customizable.initializeBots('All events storage has reached limit, Script terminated.')
+                print('All events storage has reached limit, Script terminated.')
                 if removingbot then
                     removeBot()
                     sleep(2000)
                 else
-                    customizable.warp(customizable.randomLetter(),"")
+                    customizable.warp(customizable.randomLetter(),'')
                 end
-                customizable.notifications("["..pcallBot.."]All events storage has reached limit!")
-                getBot():stopScript()
+                customizable.localInfo()
+                customizable.notifications(pcallBot..'. All events storage has reached limit')
+                bot:stopScript()
             end
         end
     end
-    initialize[world] = ""..customizable.itemFloat(eventList[1]).."x"
+    initialize[world] = ''..customizable.itemFloat(eventList[1])..'x'
     if clearhistory then
         customizable.joinRandom()
     end
@@ -545,52 +556,53 @@ end
 
 customizable.onPack = function()
     for i = customizable.variablePack , #storagepack do
-        print("["..pcallBot.."]Dropping packs")
-        world = customizable.split(storagepack[i],"[^|]+")[1]
-        door = customizable.split(storagepack[i],"[^|]+")[2]
+        print(pcallBot..'. Dropping packs')
+        world = customizable.split(storagepack[i],'[^|]+')[1]
+        door = customizable.split(storagepack[i],'[^|]+')[2]
         customizable.warp(world,door)
-        customizable.initializeBots()
         if not nuked then
             if not wrong then
+                customizable.localInfo()
                 if customizable.itemFloat(packList[1]) >= limitpack then
-                    initialize[world] = ""..customizable.itemFloat(packList[1]).."x (LIMIT)"
-                    customizable.botStatics("Packs storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
-                    print("["..pcallBot.."]Packs storage : ("..world..") has reached limit, skipped world")
+                    initialize[world] = customizable.itemFloat(packList[1])..'x (LIMIT)'
+                    customizable.initializeBots('Storage pack : '..world..' has reached limit, skipped world')
+                    print(pcallBot..'. Storage pack : '..world..' has reached limit, skipped world')
                     customizable.variablePack = customizable.variablePack + 1
                     customizable.indexPack = 0
                     if customizable.variablePack > #storagepack then
-                        initialize[world] = ""..customizable.itemFloat(packList[1]).."x (LIMIT)"
-                        customizable.botStatics("All packs storage has reached limit","Status Script : Stopped, Reason : All packs storage has reached limit")
-                        customizable.initializeBots()
+                        initialize[world] = customizable.itemFloat(packList[1])..'x (LIMIT)'
+                        print('All packs storage has reached limit, Script terminated')
+                        customizable.initializeBots('All packs storage has reached limit, Script terminated')
                         if removingbot then
                             removeBot()
                             sleep(2000)
                         else
-                            customizable.warp(customizable.randomLetter(),"")
+                            customizable.warp(customizable.randomLetter(),'')
                         end
-                        customizable.notifications("["..pcallBot.."]All packs storage has reached limit")
-                        getBot():stopScript()
+                        customizable.localInfo()
+                        customizable.notifications(pcallBot..'. All packs storage has reached limit')
+                        bot:stopScript()
                     end
                 else
                     for y,pack in pairs(packList) do
-                        for i,tile in pairs(getBot():getWorld():getTiles()) do
+                        for i,tile in pairs(bot:getWorld():getTiles()) do
                             if separated then
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
-                                    getBot():findPath(customizable.packX + (customizable.indexPack),customizable.packY - (y-1))
+                                    bot:findPath(customizable.packX + (customizable.indexPack),customizable.packY - (y - 1))
                                     sleep(100)
                                     local count = 0
-                                    customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y-1))
+                                    customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y - 1))
                                     if customizable.packX + (customizable.indexPack) >= 98 then
                                         customizable.packY = customizable.packY - 1
                                         customizable.indexPack = 0
                                     end
-                                    while getBot():getInventory():getItemCount(pack) > 0 do
-                                        getBot():setDirection(true)
+                                    while inventory:getItemCount(pack) > 0 do
+                                        bot:setDirection(true)
                                         sleep(30)
-                                        getBot():drop(pack,200)
+                                        bot:drop(pack,200)
                                         sleep(delaydrop * 1000)
-                                        customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y-1))
+                                        customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y - 1))
                                         count = count + 1
                                         if count >= 2 then
                                             customizable.indexPack = customizable.indexPack + 1
@@ -598,26 +610,26 @@ customizable.onPack = function()
                                         end
                                     end
                                 end
-                                if getBot():getInventory():getItemCount(pack) == 0 then
+                                if inventory:getItemCount(pack) == 0 then
                                     break
                                 end
                             else
                                 if tile.fg == 0 or tile.bg == 0 then
                                     ::BACK::
-                                    getBot():findPath(customizable.packX + (customizable.indexPack),customizable.packY)
+                                    bot:findPath(customizable.packX + (customizable.indexPack),customizable.packY)
                                     sleep(100)
                                     local count = 0
-                                    customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y-1))
+                                    customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y - 1))
                                     if customizable.packX + (customizable.indexPack) >= 98 then
                                         customizable.packY = customizable.packY - 1
                                         customizable.indexPack = 0
                                     end
-                                    while getBot():getInventory():getItemCount(pack) > 0 do
-                                        getBot():setDirection(true)
+                                    while inventory:getItemCount(pack) > 0 do
+                                        bot:setDirection(true)
                                         sleep(30)
-                                        getBot():drop(pack,200)
+                                        bot:drop(pack,200)
                                         sleep(delaydrop * 1000)
-                                        customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y-1))
+                                        customizable.reconnect(world,door,customizable.packX + (customizable.indexPack),customizable.packY - (y - 1))
                                         count = count + 1
                                         if count >= 2 then
                                             customizable.indexPack = customizable.indexPack + 1
@@ -625,7 +637,7 @@ customizable.onPack = function()
                                         end
                                     end
                                 end
-                                if getBot():getInventory():getItemCount(pack) == 0 then
+                                if inventory:getItemCount(pack) == 0 then
                                     break
                                 end
                             end
@@ -634,45 +646,49 @@ customizable.onPack = function()
                     break
                 end
             else
-                initialize[world] = "WRONG DOOR"
+                initialize[world] = 'Wrong door'
                 wrong = false
-                print("["..pcallBot.."]("..world..") Id door packs storage is wrong, check ur id door!")
-                customizable.botStatics("||"..world.."|| Id door packs storage is wrong","Status Script : Running")
+                print(pcallBot..'. Storage pack : '..world..' are wrong door id, skipped world')
+                customizable.initializeBots('Storage pack : '..world..' are wrong door id, skipped world')
                 customizable.variablePack = customizable.variablePack + 1
                 customizable.indexPack = 0
                 if customizable.variablePack > #storagepack then
-                    customizable.botStatics("All packs storage has reached limit!","Status Script : Stopped, Reason : All packs storage has reached limit!")
+                    customizable.initializeBots('All packs storage has reached limit, Script terminated.')
+                    print('All packs storage has reached limit, Script terminated.')
                     if removingbot then
                         removeBot()
                         sleep(2000)
                     else
-                        customizable.warp(customizable.randomLetter(),"")
+                        customizable.warp(customizable.randomLetter(),'')
                     end
-                    customizable.notifications("["..pcallBot.."]All packs storage has reached limit")
-                    getBot():stopScript()
+                    customizable.localInfo()
+                    customizable.notifications(pcallBot..'. All packs storage has reached limit')
+                    bot:stopScript()
                 end
             end
         else
-            initialize[world] = "NUKED"
+            initialize[world] = 'Nuked'
             nuked = false
-            print("["..pcallBot.."]("..world..") packs Storage is NUKED, check ur storage!")
-            customizable.botStatics("||"..world.."|| packs Storage is NUKED, check ur storage!","Status Script : Running")
+            print(pcallBot..'. Storage pack : '..world..' are Nuked, skipped world')
+            customizable.initializeBots('Storage pack : '..world..' are Nuked, skipped world')
             customizable.variablePack = customizable.variablePack + 1
             customizable.indexPack = 0
             if customizable.variablePack > #storagepack then
-                customizable.botStatics("All packs storage has reached limit!","Status Script : Stopped, Reason : All packs storage has reached limit!")
+                customizable.initializeBots('All packs storage has reached limit, Script terminated.')
+                print('All packs storage has reached limit, Script terminated.')
                 if removingbot then
                     removeBot()
                     sleep(2000)
                 else
-                    customizable.warp(customizable.randomLetter(),"")
+                    customizable.warp(customizable.randomLetter(),'')
                 end
-                customizable.notifications("["..pcallBot.."]All packs storage has reached limit!")
-                getBot():stopScript()
+                customizable.localInfo()
+                customizable.notifications(pcallBot..'. All packs storage has reached limit')
+                bot:stopScript()
             end
         end
     end
-    initialize[world] = ""..customizable.itemFloat(packList[1]).."x"
+    initialize[world] = ''..customizable.itemFloat(packList[1])..'x'
     if clearhistory then
         customizable.joinRandom()
     end
@@ -680,37 +696,38 @@ end
 
 customizable.onSeed = function()
     for i = customizable.variableSeed , #storageseed do
-        print("["..pcallBot.."]Dropping seeds")
-        world = customizable.split(storageseed[i],"[^|]+")[1]
-        door = customizable.split(storageseed[i],"[^|]+")[2]
+        print(pcallBot..'. Dropping seeds')
+        world = customizable.split(storageseed[i],'[^|]+')[1]
+        door = customizable.split(storageseed[i],'[^|]+')[2]
         customizable.warp(world,door)
-        customizable.initializeBots()
         if not nuked then
             if not wrong then
+                customizable.localInfo()
                 if customizable.itemFloat(customizable.seed) >= limitseed then
-                    initialize[world] = ""..customizable.itemFloat(customizable.seed).."x (LIMIT)"
-                    customizable.botStatics("Seeds storage : ||"..world.."|| has reached limit, skipped world","Status Script : Running")
-                    print("["..pcallBot.."]Seeds storage : ("..world..") has reached limit, skipped world")
+                    initialize[world] = customizable.itemFloat(customizable.seed)..'x (LIMIT)'
+                    customizable.initializeBots('Storage seed : '..world..' has reached limit, skipped world')
+                    print(pcallBot..'. Storage seed : '..world..' has reached limit, skipped world')
                     customizable.variableSeed = customizable.variableSeed + 1
                     customizable.indexSeed = 0
                     if customizable.variableSeed > #storageseed then
-                        initialize[world] = ""..customizable.itemFloat(customizable.seed).."x (LIMIT)"
-                        customizable.botStatics("All seeds storage has reached limit","Status Script : Stopped, Reason : All seeds storage has reached limit")
-                        customizable.initializeBots()
+                        initialize[world] = customizable.itemFloat(customizable.seed)..'x (LIMIT)'
+                        print('All seeds storage has reached limit, Script terminated')
+                        customizable.initializeBots('All seeds storage has reached limit, Script terminated')
                         if removingbot then
                             removeBot()
                             sleep(2000)
                         else
-                            customizable.warp(customizable.randomLetter(),"")
+                            customizable.warp(customizable.randomLetter(),'')
                         end
-                        customizable.notifications("["..pcallBot.."]All seeds storage has reached limit")
-                        getBot():stopScript()
+                        customizable.localInfo()
+                        customizable.notifications(pcallBot..'. All seeds storage has reached limit')
+                        bot:stopScript()
                     end
                 else
-                    for i,tile in pairs(getBot():getWorld():getTiles()) do
+                    for i,tile in pairs(bot:getWorld():getTiles()) do
                         if tile.fg == 0 or tile.bg == 0 then
                             ::BACK::
-                            getBot():findPath(customizable.seedX + (customizable.indexSeed),customizable.seedY)
+                            bot:findPath(customizable.seedX + (customizable.indexSeed),customizable.seedY)
                             sleep(500)
                             local count = 0
                             customizable.reconnect(world,door,customizable.seedX + (customizable.indexSeed),customizable.seedY)
@@ -718,10 +735,10 @@ customizable.onSeed = function()
                                 customizable.seedY = customizable.seedY - 1
                                 customizable.indexSeed = 0
                             end
-                            while getBot():getInventory():getItemCount(customizable.seed) > 0 do
-                                getBot():setDirection(true)
+                            while inventory:getItemCount(customizable.seed) > 0 do
+                                bot:setDirection(true)
                                 sleep(30)
-                                getBot():drop(customizable.seed,200)
+                                bot:drop(customizable.seed,200)
                                 sleep(delaydrop * 1000)
                                 customizable.reconnect(world,door,customizable.seedX + (customizable.indexSeed),customizable.seedY)
                                 count = count + 1
@@ -731,52 +748,56 @@ customizable.onSeed = function()
                                 end
                             end
                         end
-                        if getBot():getInventory():getItemCount(customizable.seed) == 0 then
+                        if inventory:getItemCount(customizable.seed) == 0 then
                             break
                         end
                     end
                     break
                 end
             else
-                initialize[world] = "WRONG DOOR"
+                initialize[world] = 'Wrong door'
                 wrong = false
-                print("["..pcallBot.."]("..world..") Id door seeds storage is wrong, check ur id door!")
-                customizable.botStatics("||"..world.."|| Id door seeds storage is wrong, check ur id door!","Script Status : Running")
+                print(pcallBot..'. Storage seed : '..world..' are wrong door id, skipped world')
+                customizable.initializeBots('Storage seed : '..world..' are wrong door id, skipped world')
                 customizable.variableSeed = customizable.variableSeed + 1
                 customizable.indexSeed = 0
                 if customizable.variableSeed > #storageseed then
-                    customizable.botStatics("All seeds storage has reached limit","Script Status : Stopped, Reason : All seeds storage has reached limit")
+                    print('All seeds storage has reached limit, Script terminated.')
+                    customizable.initializeBots('All seeds storage has reached limit, Script terminated.')
                     if removingbot then
                         removeBot()
                         sleep(2000)
                     else
-                        customizable.warp(customizable.randomLetter(),"")
+                        customizable.warp(customizable.randomLetter(),'')
                     end
-                    customizable.notifications("["..pcallBot.."]All seeds storage has reached limit")
-                    getBot():stopScript()
+                    customizable.localInfo()
+                    customizable.notifications(pcallBot..'. All seeds storage has reached limit')
+                    bot:stopScript()
                 end
             end
         else
-            initialize[world] = "NUKED"
+            initialize[world] = 'NUKED'
             nuked = false
-            print("["..pcallBot.."]("..world..") seeds Storage is NUKED, check ur storage!")
-            customizable.botStatics("||"..world.."|| seeds Storage is NUKED, check ur storage!","Script Status : Running")
+            print(pcallBot..'. Storage seed : '..world..' are Nuked, skipped world')
+            customizable.initializeBots('Storage seed : '..world..' are Nuked, skipped world')
             customizable.variableSeed = customizable.variableSeed + 1
             customizable.indexSeed = 0
             if customizable.variableSeed > #storageseed then
-                customizable.botStatics("All seeds storage has reached limit!","Script Status : Stopped, Reason : All seeds storage has reached limit")
+                print('All seeds storage has reached limit, Script terminated.')
+                customizable.initializeBots('All seeds storage has reached limit, Script terminated.')
                 if removingbot then
                     removeBot()
                     sleep(2000)
                 else
-                    customizable.warp(customizable.randomLetter(),"")
+                    customizable.warp(customizable.randomLetter(),'')
                 end
-                customizable.notifications("["..pcallBot.."]All seeds storage has reached limit!")
-                getBot():stopScript()
+                customizable.localInfo()
+                customizable.notifications(pcallBot..'. All seeds storage has reached limit')
+                bot:stopScript()
             end
         end
     end
-    initialize[world] = ""..customizable.itemFloat(customizable.seed).."x"
+    initialize[world] = ''..customizable.itemFloat(customizable.seed)..'x'
     if clearhistory then
         customizable.joinRandom()
     end
@@ -784,37 +805,38 @@ end
 
 customizable.onBlock = function()
     for i = customizable.variableBlock , #storageblock do
-        print("["..pcallBot.."]Dropping Blocks")
-        world = customizable.split(storageblock[i],"[^|]+")[1]
-        door = customizable.split(storageblock[i],"[^|]+")[2]
+        print(pcallBot..'. Dropping blocks')
+        world = customizable.split(storageblock[i],'[^|]+')[1]
+        door = customizable.split(storageblock[i],'[^|]+')[2]
         customizable.warp(world,door)
-        customizable.initializeBots()
         if not nuked then
             if not wrong then
+                customizable.localInfo()
                 if customizable.itemFloat(block) >= limitblock then
-                    initialize[world] = ""..customizable.itemFloat(block).."x (LIMIT)"
-                    customizable.botStatics("Blocks storage : "..world.." has reached limit, skipped world","Script Status : Running")
-                    print("["..pcallBot.."]Blocks storage : ("..world..") has reached limit, skipped world")
+                    initialize[world] = customizable.itemFloat(block)..'x (LIMIT)'
+                    customizable.initializeBots('Storage block : '..world..' has reached limit, skipped world')
+                    print(pcallBot..'. Storage block : '..world..' has reached limit, skipped world')
                     customizable.variableBlock = customizable.variableBlock + 1
                     customizable.indexBlock = 0
                     if customizable.variableBlock > #storageblock then
-                        initialize[world] = ""..customizable.itemFloat(block).."x (LIMIT)"
-                        customizable.botStatics("All blocks storage has reached limit","Script Status : Stopped, Reason : All blocks storage has reached limit")
-                        customizable.initializeBots()
+                        initialize[world] = customizable.itemFloat(block)..'x (LIMIT)'
+                        print('All blocks storage has reached limit, Script terminated')
+                        customizable.initializeBots('All blocks storage has reached limit, Script terminated')
                         if removingbot then
                             removeBot()
                             sleep(2000)
                         else
-                            customizable.warp(customizable.randomLetter(),"")
+                            customizable.warp(customizable.randomLetter(),'')
                         end
-                        customizable.notifications("["..pcallBot.."]All blocks storage has reached limit")
-                        getBot():stopScript()
+                        customizable.localInfo()
+                        customizable.notifications(pcallBot..'. All blocks storage has reached limit')
+                        bot:stopScript()
                     end
                 else
-                    for i,tile in pairs(getBot():getWorld():getTiles()) do
+                    for i,tile in pairs(bot:getWorld():getTiles()) do
                         if tile.fg == 0 or tile.bg == 0 then
                             ::BACK::
-                            getBot():findPath(customizable.blockX + (customizable.indexBlock),customizable.blockY)
+                            bot:findPath(customizable.blockX + (customizable.indexBlock),customizable.blockY)
                             sleep(500)
                             local count = 0
                             customizable.reconnect(world,door,customizable.blockX + (customizable.indexBlock),customizable.blockY)
@@ -822,10 +844,10 @@ customizable.onBlock = function()
                                 customizable.blockY = customizable.blockY - 1
                                 customizable.indexBlock = 0
                             end
-                            while getBot():getInventory():getItemCount(block) > 0 do
-                                getBot():setDirection(true)
+                            while inventory:getItemCount(block) > 0 do
+                                bot:setDirection(true)
                                 sleep(30)
-                                getBot():drop(block,200)
+                                bot:drop(block,200)
                                 sleep(delaydrop * 1000)
                                 customizable.reconnect(world,door,customizable.blockX + (customizable.indexBlock),customizable.blockY)
                                 count = count + 1
@@ -835,314 +857,327 @@ customizable.onBlock = function()
                                 end
                             end
                         end
-                        if getBot():getInventory():getItemCount(block) == 0 then
+                        if inventory:getItemCount(block) == 0 then
                             break
                         end
                     end
                     break
                 end
             else
-                initialize[world] = "WRONG DOOR"
+                initialize[world] = 'Wrong door'
                 wrong = false
-                print("["..pcallBot.."]("..world..") Id door blocks storage is wrong, check ur id door!")
-                customizable.botStatics("||"..world.."|| Id door blocks storage is wrong, check ur id door!","Script Status : Running")
+                print(pcallBot..'. Storage block : '..world..' are wrong door id, skipped world')
+                customizable.initializeBots('Storage block : '..world..' are wrong door id, skipped world')
                 customizable.variableBlock = customizable.variableBlock + 1
                 customizable.indexBlock = 0
                 if customizable.variableBlock > #storageblock then
-                    customizable.botStatics("All blocks storage has reached limit","Script Status : Stopped, Reason : All blocks storage has reached limit")
+                    print('All blocks storage has reached limit, Script terminated.')
+                    customizable.initializeBots('All blocks storage has reached limit, Script terminated.')
                     if removingbot then
                         removeBot()
                         sleep(2000)
                     else
-                        customizable.warp(customizable.randomLetter(),"")
+                        customizable.warp(customizable.randomLetter(),'')
                     end
-                    customizable.notifications("["..pcallBot.."]All blocks storage has reached limit")
-                    getBot():stopScript()
+                    customizable.localInfo()
+                    customizable.notifications(pcallBot..'. All blocks storage has reached limit')
+                    bot:stopScript()
                 end
             end
         else
-            initialize[world] = "NUKED"
+            initialize[world] = 'NUKED'
             nuked = false
-            print("["..pcallBot.."]("..world..") blocks Storage is NUKED, check ur storage!")
-            customizable.botStatics("||"..world.."|| blocks Storage is NUKED, check ur storage!","Status Script : Running")
+            print(pcallBot..'. Storage block : '..world..' are Nuked, skipped world')
+            customizable.initializeBots('Storage block : '..world..' are Nuked, skipped world')
             customizable.variableBlock = customizable.variableBlock + 1
             customizable.indexBlock = 0
             if customizable.variableBlock > #storageblock then
-                customizable.botStatics("All blocks storage has reached limit!","Status Script : Stopped, Reason : All blocks storage has reached limit!")
+                print('All blocks storage has reached limit, Script terminated.')
+                customizable.initializeBots('All blocks storage has reached limit, Script terminated.')
                 if removingbot then
                     removeBot()
                     sleep(2000)
                 else
-                    customizable.warp(customizable.randomLetter(),"")
+                    customizable.warp(customizable.randomLetter(),'')
                 end
-                customizable.notifications("["..pcallBot.."]All blocks storage has reached limit!")
-                getBot():stopScript()
+                customizable.localInfo()
+                customizable.notifications(pcallBot..'. All blocks storage has reached limit')
+                bot:stopScript()
             end
         end
     end
-    initialize[world] = ""..customizable.itemFloat(block).."x"
+    initialize[world] = ''..customizable.itemFloat(block)..'x'
     if clearhistory then
         customizable.joinRandom()
     end
 end
 
-customizable.recheckingWorld = function(threads)
+customizable.recheckingWorld = function(threads,door)
     tileA = 99
     tileB = 0
     tileC = -1
     tileD = 0
-    print("["..pcallBot.."]Rechecking")
-    getBot().auto_collect = true
+    print(pcallBot..'. Rechecking')
+    bot.auto_collect = true
     for y = -1, 53 do
         for x = tileA, tileB, tileC do
             if getTile(x,y).fg == customizable.seed and getTile(x,y):canHarvest() then
-                getBot():findPath(x,y)
+                bot:findPath(x,y)
                 sleep(30)
                 customizable.reconnect(threads,door,x,y)
-                count = 0
-                while getTile(x,y).fg == customizable.seed and getBot():getWorld():hasAccess(x,y) ~= 0 and not getTile(x,y):hasFlag(4096) do
-                    getBot():hit(x,y)
-                    sleep(delayharvest)
+                while getTile(x,y).fg == customizable.seed and bot:getWorld():hasAccess(x,y) ~= 0 and not getTile(x,y):hasFlag(4096) and getTile(x,y):canHarvest() do
+                    bot:hit(x,y)
+                    sleep(30)
                     customizable.reconnect(threads,door,x,y)
-                    count = count + 1
-                    if count == 15 then
-                        count = 0
-                        break
-                    end
                 end
             end
-            if getBot():getInventory():getItemCount(idItemSupport) == 0 and wearingItemSupport then
-                getBot().auto_collect = false
-                while getBot():getInventory():getItemCount(idItemSupport) == 0 do
+            if inventory:getItemCount(idItemSupport) == 0 and wearingItemSupport then
+                bot.auto_collect = false
+                while inventory:getItemCount(idItemSupport) == 0 do
                     customizable.wearingItemEvent()
                     sleep(6000)
                 end
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
-            if getBot():getInventory():getItemCount(block) > amountBlock then
-                getBot().auto_collect = false
+            if inventory:getItemCount(block) >= amountBlock then
+                bot.auto_collect = false
                 if recycle then
                     customizable.itemRecycle()
                 else
                     customizable.onBlock()
+                    print(pcallBot..'. Rechecking')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
+                    customizable.localInfo()
                 end
-                getBot().auto_collect = true
+                bot.auto_collect = true
             end
-            if autoSwitch and getBot().level >= switchOnLevel then
-                getBot().auto_collect = false
-                if getBot():getInventory():getItemCount(block) > 0 then
+            if autoSwitch and bot.level >= switchOnLevel then
+                bot.auto_collect = false
+                if inventory:getItemCount(block) > 0 then
                     customizable.onBlock()
                 end
-                if getBot():getInventory():getItemCount(customizable.seed) > 0 then
+                if inventory:getItemCount(customizable.seed) > 0 then
                     customizable.onSeed()
                 end
                 customizable.onBackup(threads)
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
             if customizable.detectTable(eventList,amountEvent) then
-                getBot().auto_collect = false
+                bot.auto_collect = false
                 customizable.onEvent()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
-            if getBot():getInventory():getItemCount(customizable.seed) > amountSeed then
-                getBot().auto_collect = false
+            if inventory:getItemCount(customizable.seed) >= amountSeed then
+                bot.auto_collect = false
                 customizable.onSeed()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
-            elseif getBot().gem_count >= mingems and buypack then
-                getBot().auto_collect = false
+                customizable.localInfo()
+                bot.auto_collect = true
+            elseif bot.gem_count >= mingems and buypack then
+                bot.auto_collect = false
                 customizable.buying()
                 customizable.onPack()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
         end
     end
-    for idx, obj in ipairs(getBot():getWorld():getObjects()) do
+    for idx, obj in ipairs(bot:getWorld():getObjects()) do
         if obj.id == block then
             if customizable.itemFloat(block) ~= 0 then
-                getBot():findPath(math.floor(obj.x / 32),math.floor(obj.y / 32))
+                bot:findPath(math.floor(obj.x / 32),math.floor(obj.y / 32))
                 sleep(30)
                 customizable.reconnect(threads,door,math.floor(obj.x / 32),math.floor(obj.y / 32))
             end
-            if getBot():getInventory():getItemCount(block) > amountBlock then
-                getBot().auto_collect = false
+            if inventory:getItemCount(block) >= amountBlock then
+                bot.auto_collect = false
                 if recycle then
                     customizable.itemRecycle()
                 else
                     customizable.onBlock()
+                    print(pcallBot..'. Rechecking')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
+                    customizable.localInfo()
                 end
-                getBot().auto_collect = true
+                bot.auto_collect = true
             end
             if customizable.detectTable(eventList,amountEvent) then
-                getBot().auto_collect = false
+                bot.auto_collect = false
                 customizable.onEvent()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
-            if getBot():getInventory():getItemCount(customizable.seed) > amountSeed then
-                getBot().auto_collect = false
+            if inventory:getItemCount(customizable.seed) >= amountSeed then
+                bot.auto_collect = false
                 customizable.onSeed()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
-            elseif getBot().gem_count >= mingems and buypack then
-                getBot().auto_collect = false
+                customizable.localInfo()
+                bot.auto_collect = true
+            elseif bot.gem_count >= mingems and buypack then
+                bot.auto_collect = false
                 customizable.buying()
                 customizable.onPack()
+                print(pcallBot..'. Rechecking')
                 customizable.warp(threads,door)
-                customizable.initializeBots()
-                getBot().auto_collect = true
+                customizable.localInfo()
+                bot.auto_collect = true
             end
         end
     end
 end
 
 customizable.pattern = function(world,id)
-    botX = getBot().x
-    botY = getBot().y
+    botX = bot.x
+    botY = bot.y
     if botX == 1 then
         botX = botX + 2
-        getBot():findPath(botX,botY)
+        bot:findPath(botX,botY)
         sleep(100)
     elseif botX == 2 then
         botX = botX + 1
-        getBot():findPath(botX,botY)
+        bot:findPath(botX,botY)
         sleep(100)
     elseif botX == 0 then
         botX = botX + 3
-        getBot():findPath(botX,botY)
+        bot:findPath(botX,botY)
         sleep(100)
     end
     count = 0
     while customizable.hitFarmable(botX,botY,-2) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY - 2).fg == customizable.seed and getBot():getWorld():hasAccess(botX + i,botY - 2) ~= 0 and not getTile(botX + i,botY - 2):hasFlag(4096) then
-                getBot():hit(botX + i,botY - 2)
+            if getTile(botX + i,botY - 2).fg == customizable.seed and getTile(botX + i,botY):canHarvest() and bot:getWorld():hasAccess(botX + i,botY - 2) ~= 0 and not getTile(botX + i,botY - 2):hasFlag(4096) then
+                bot:hit(botX + i,botY - 2)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 50 then
+        if count == 20 then
             count = 0
             break
         end
     end
     while customizable.hitFarmable(botX,botY,0) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY).fg == customizable.seed and getTile(botX + i,botY):canHarvest() and getBot():getWorld():hasAccess(botX+i,botY) ~= 0 and not getTile(botX+i,botY):hasFlag(4096) then
-                getBot():hit(botX + i,botY)
+            if getTile(botX + i,botY).fg == customizable.seed and getTile(botX + i,botY):canHarvest() and bot:getWorld():hasAccess(botX+i,botY) ~= 0 and not getTile(botX+i,botY):hasFlag(4096) then
+                bot:hit(botX + i,botY)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 50 then
+        if count == 20 then
             count = 0
             break
         end
     end
     while customizable.hitFarmable(botX,botY,2) do
         for _,i in pairs(botTile) do
-            if getTile(botX + i,botY+2).fg == customizable.seed and getTile(botX + i,botY+2):canHarvest() and getBot():getWorld():hasAccess(botX+i,botY + 2) ~= 0 and not getTile(botX+i,botY + 2):hasFlag(4096) then
-                getBot():hit(botX + i,botY+2)
+            if getTile(botX + i,botY+2).fg == customizable.seed and getTile(botX + i,botY+2):canHarvest() and bot:getWorld():hasAccess(botX+i,botY + 2) ~= 0 and not getTile(botX+i,botY + 2):hasFlag(4096) then
+                bot:hit(botX + i,botY+2)
                 sleep(delayharvest)
                 customizable.reconnect(world,id,botX,botY)
             end
         end
         count = count + 1
-        if count == 50 then
+        if count == 20 then
             count = 0
             break
         end
     end
-    sleep(delayharvest)
 end
 
-customizable.harvestWorld = function(threads)
+customizable.harvestWorld = function(threads,door)
     tileA = 99
     tileB = 0
     tileC = -1
     tileD = 0
-    print("["..pcallBot.."]Harvest")
-    getBot().auto_collect = true
+    print(pcallBot..'. Harvest')
+    bot.auto_collect = true
     for val = 2,3 do
         for y = val, 53, increment do
             for x = tileA, tileB, tileC do
                 if getTile(x,y).fg == customizable.seed and getTile(x,y):canHarvest() and x >= 3 then
-                    getBot():findPath(x-2,y)
+                    bot:findPath(x-2,y)
                     sleep(30)
                     customizable.reconnect(threads,door,x-2,y)
                     customizable.pattern(threads,door)
                 end
-                if getBot():getInventory():getItemCount(idItemSupport) == 0 and wearingItemSupport then
-                    getBot().auto_collect = false
-                    while getBot():getInventory():getItemCount(idItemSupport) == 0 do
+                if inventory:getItemCount(idItemSupport) == 0 and wearingItemSupport then
+                    bot.auto_collect = false
+                    while inventory:getItemCount(idItemSupport) == 0 do
                         customizable.wearingItemEvent()
                         sleep(6000)
                     end
+                    print(pcallBot..'. Harvest')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
-                    getBot().auto_collect = true
+                    customizable.localInfo()
+                    bot.auto_collect = true
                 end
-                if getBot():getInventory():getItemCount(block) > amountBlock then
-                    getBot().auto_collect = false
+                if inventory:getItemCount(block) >= amountBlock then
+                    bot.auto_collect = false
                     if recycle then
                         customizable.itemRecycle()
                     else
                         customizable.onBlock()
+                        print(pcallBot..'. Harvest')
                         customizable.warp(threads,door)
-                        customizable.initializeBots()
+                        customizable.localInfo()
                     end
-                    getBot().auto_collect = true
+                    bot.auto_collect = true
                 end
-                if autoSwitch and getBot().level >= switchOnLevel then
-                    getBot().auto_collect = false
-                    if getBot():getInventory():getItemCount(block) > 0 then
+                if autoSwitch and bot.level >= switchOnLevel then
+                    bot.auto_collect = false
+                    if inventory:getItemCount(block) > 0 then
                         customizable.onBlock()
                     end
-                    if getBot():getInventory():getItemCount(customizable.seed) > 0 then
+                    if inventory:getItemCount(customizable.seed) > 0 then
                         customizable.onSeed()
                     end
                     customizable.onBackup(threads)
+                    print(pcallBot..'. Harvest')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
-                    getBot().auto_collect = true
+                    customizable.localInfo()
+                    bot.auto_collect = true
                 end
                 if customizable.detectTable(eventList,amountEvent) then
-                    getBot().auto_collect = false
+                    bot.auto_collect = false
                     customizable.onEvent()
+                    print(pcallBot..'. Harvest')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
-                    getBot().auto_collect = true
+                    customizable.localInfo()
+                    bot.auto_collect = true
                 end
-                if getBot():getInventory():getItemCount(customizable.seed) > amountSeed then
-                    getBot().auto_collect = false
+                if inventory:getItemCount(customizable.seed) >= amountSeed then
+                    bot.auto_collect = false
                     customizable.onSeed()
+                    print(pcallBot..'. Harvest')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
-                    getBot().auto_collect = true
-                elseif getBot().gem_count >= mingems and buypack then
-                    getBot().auto_collect = false
+                    customizable.localInfo()
+                    bot.auto_collect = true
+                elseif bot.gem_count >= mingems and buypack then
+                    bot.auto_collect = false
                     customizable.buying()
                     customizable.onPack()
+                    print(pcallBot..'. Harvest')
                     customizable.warp(threads,door)
-                    customizable.initializeBots()
-                    getBot().auto_collect = true
+                    customizable.localInfo()
+                    bot.auto_collect = true
                 end
             end
         end
@@ -1150,57 +1185,51 @@ customizable.harvestWorld = function(threads)
 end
 
 customizable.wearingItemEvent = function()
-    print("["..pcallBot.."]Take support items")
-    world = customizable.split(worldwearitem[customizable.index],"[^|]+")[1]
-    door = customizable.split(worldwearitem[customizable.index],"[^|]+")[2]
+    print(pcallBot..'. Take support items')
+    world = customizable.split(worldwearitem[customizable.index],'[^|]+')[1]
+    door = customizable.split(worldwearitem[customizable.index],'[^|]+')[2]
     customizable.warp(world,door)
     if not nuked then
         if not wrong then
-            if getBot():getInventory():getItemCount(idItemSupport) == 0 and customizable.itemFloat(idItemSupport) >= keepItemSupport then
-                for _, obj in pairs(getBot():getWorld():getObjects()) do
+            if inventory:getItemCount(idItemSupport) == 0 and customizable.itemFloat(idItemSupport) >= keepItemSupport then
+                for _, obj in pairs(bot:getWorld():getObjects()) do
                     if obj.id == idItemSupport then
-                        getBot():findPath(math.floor(obj.x / 32),math.floor(obj.y / 32))
+                        bot:findPath(math.floor(obj.x / 32),math.floor(obj.y / 32))
                         sleep(100)
-                        getBot():collect(range)
+                        bot:collect(range)
                         sleep(100)
                         customizable.reconnect(world,door,math.floor(obj.x / 32),math.floor(obj.y / 32))
                     end
-                    if getBot():getInventory():getItemCount(idItemSupport) > 0  then
-                        break
-                    end
                 end
-                if getBot():getInventory():getItemCount(idItemSupport) > 0  then
-                    getBot():moveTo(1,0)
-                    sleep(500)
-                    getBot():wear(idItemSupport)
-                    getBot():setDirection(true)
-                    sleep(30)
-                    getBot():drop(idItemSupport,getBot():getInventory():getItemCount(idItemSupport) - keepItemSupport)
-                    sleep(500)
-                    print("["..pcallBot.."] Success take and wear the support items!")
-                    customizable.botStatics("("..getBot().name..") Success take and wear the support items!","Script Status : Running")
-                end
+                bot:moveTo(1,0)
+                sleep(500)
+                bot:wear(idItemSupport)
+                bot:setDirection(true)
+                sleep(30)
+                bot:drop(idItemSupport,inventory:getItemCount(idItemSupport) - keepItemSupport)
+                sleep(500)
+                customizable.reconnect(world,door,bot.x,bot.y)
             else
-                customizable.botStatics("Support item is empty, Drop the support item right now!","Script Status : Stopped, Reason : Support item is empty")
-                customizable.notifications("["..pcallBot.."]Support item is empty, Drop the support item right now!")
-                getBot():stopScript()
+                customizable.initializeBots('Support item is empty, Drop the support item right now!')
+                customizable.notifications(pcallBot..'. Support item is empty, Drop the support item right now!')
+                bot:stopScript()
             end
         else
             wrong = false
-            customizable.botStatics("Id door world take support items is wrong, check ur id door!","Script Status : Stopped, Reason : Id door world take support items is wrong")
-            customizable.notifications("["..pcallBot.."]Id door world take support items is wrong, check ur id door!")
-            getBot():stopScript()
+            customizable.initializeBots('Id door world take support items is wrong, check ur id door!')
+            customizable.notifications(pcallBot..'. Id door world take support items is wrong, check ur id door!')
+            bot:stopScript()
         end
     else
         nuked = false
-        customizable.botStatics("World take support items is nuked, check ur world!","Script Status : Stopped, Reason : World take support items is nuked")
-        customizable.notifications("["..pcallBot.."]World take support items is nuked, check ur world!")
-        getBot():stopScript()
+        customizable.initializeBots('World take support items is nuked, check ur world!')
+        customizable.notifications(pcallBot..'. World take support items is nuked, check ur world!')
+        bot:stopScript()
     end
 end
 
 customizable.randomLetter = function()
-    local letter = ""
+    local letter = ''
     local function stringRandom()
         local random = math.random(1,3)
         if random == 1 then
@@ -1218,53 +1247,54 @@ customizable.randomLetter = function()
 end
 
 customizable.onBackup = function(threads)
+    customizable.initializeBots('Bot : '..bot.name..' reached max level, switching bot')
     ::BACK::
-    customizable.botStatics("Bot : "..getBot().name.." reached max level, switching bot","Script Status : Running")
     for idx = customizable.indexBackup, #botBackup do
-        thread = customizable.split(botBackup[idx],"([^|]+)")[1]
-        threading = customizable.split(botBackup[idx],"([^|]+)")[2]
-        if typeaccount == "normal" then
-            getBot():updateBot(thread,threading)
+        thread = customizable.split(botBackup[idx],'([^|]+)')[1]
+        threading = customizable.split(botBackup[idx],'([^|]+)')[2]
+        if typeaccount == 'normal' then
+            bot:updateBot(thread,threading)
             sleep(delayloginbot * 1000)
-        elseif typeaccount == "guest" then
-            getBot():updateBot(""..customizable.randomLetter().."",thread,threading)
+        elseif typeaccount == 'guest' then
+            bot:updateBot(''..customizable.randomLetter()..'',thread,threading)
             sleep(delayloginbot * 1000)
         end
-        getBot().auto_reconnect = false
-        customizable.botStatics("Succes switching bot to : "..getBot().name.."","Script Status : Running")
-        while getBot().status ~= BotStatus.online do
-            getBot():connect()
+        bot.auto_reconnect = false
+        customizable.initializeBots('Succes switching bot to : '..bot.name..'')
+        while bot.status ~= BotStatus.online do
+            bot:connect()
             sleep(delayreconnect * 1000)
-            if getBot().status == BotStatus.account_banned then
-                initialize[thread] = "Suspended"
-                customizable.writeFile("switchStatus","["..getBot().name.."] status is Suspended")
+            if bot.status == BotStatus.account_banned then
+                initialize[thread] = 'Suspended'
+                customizable.writeFile('switchStatus','['..bot.name..'] status is Suspended')
+                customizable.initializeBots('Bot status is suspended, changing bot switch.')
                 customizable.indexBackup = customizable.indexBackup + 1
                 if customizable.indexBackup > #botBackup then
-                    customizable.botStatics("No more bots to switch, sc terminated","Script Status : Stopped, Reason : No more bots to switch")
-                    customizable.initializeBots()
+                    customizable.initializeBots('No more bots to switch, sc terminated')
+                    customizable.localInfo()
                     if removingbot then
                         removeBot()
                         sleep(2000)
                     end
-                    customizable.notifications("["..pcallBot.."]No more bots to switch, sc terminated")
-                    getBot():stopScript()
+                    customizable.notifications(pcallBot..'. No more bots to switch, sc terminated')
+                    bot:stopScript()
                 end
                 goto BACK
             end
         end
-        if getBot().status == BotStatus.online and getBot().level < switchOnLevel then
-            initialize[thread] = "Used"
+        if bot.status == BotStatus.online and bot.level < switchOnLevel then
+            initialize[thread] = 'Used'
             break
-        elseif getBot().status == BotStatus.online and getBot().level >= switchOnLevel then
-            initialize[thread] = "Reached max level"
+        elseif bot.status == BotStatus.online and bot.level >= switchOnLevel then
+            initialize[thread] = 'Reached max level'
             customizable.indexBackup = customizable.indexBackup + 1
             if customizable.indexBackup > #botBackup then
                 if removingbot then
                     removeBot()
                     sleep(2000)
                 end
-                customizable.notifications("["..pcallBot.."]No more bots to switch, sc terminated")
-                getBot():stopScript()
+                customizable.notifications(pcallBot..'. No more bots to switch, sc terminated')
+                bot:stopScript()
             end
             goto BACK
         end
@@ -1272,8 +1302,8 @@ customizable.onBackup = function(threads)
 end
 
 customizable.writeFile = function(threads)
-    local file = io.open("WorldStatus.txt","a")
-    file:write(threads.."\n")
+    local file = io.open('WorldStatus.txt','a')
+    file:write(threads..'\n')
     file:close()
 end
 
@@ -1286,53 +1316,57 @@ customizable.setAuth = function()
     end
 end
 
-if Information == "Script Harvest made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq" and scriptVersion == "0.3" then
+if Information == 'Script Harvest made by Caramoy Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq' and scriptVersion == '0.3' then
     if withproxy then
         customizable.setAuth()
     end
-    while getBot().status ~= BotStatus.online do
-        getBot():connect()
+    while bot.status ~= BotStatus.online do
+        bot:connect()
         sleep(delayreconnect * 1000)
     end
     sleep(pcallBot * delayexecute * 1000)
     for idx = start,stop do
-        local world = customizable.split(assign[idx],"[^|]+")[1]
-        local door = customizable.split(assign[idx],"[^|]+")[2]
+        local world = customizable.split(assign[idx],'[^|]+')[1]
+        local door = customizable.split(assign[idx],'[^|]+')[2]
         customizable.warp(world,door)
-        customizable.initializeBots()
         if not nuked then
             if not wrong then
-                local formTime = os.time()
-                customizable.harvestWorld(assign[idx])
+                customizable.localInfo()
+                formattedTime = os.time()
+                customizable.harvestWorld(assign[idx],door)
                 for i = 1, 2 do
-                    customizable.recheckingWorld(assign[idx])
+                    customizable.recheckingWorld(assign[idx],door)
                 end
-                local formattedTime = os.time() - formTime
-                initialize[world] = math.floor(formattedTime/60).." Minutes"
+                formattedTime = os.time() - formattedTime
+                customizable.tableFormatted(string.sub(world,1,3)..' : '..(math.floor(formattedTime/60)..' Minutes'))
+                initialize[world] = math.floor(formattedTime/60)..' Minutes'
             else
-                customizable.writeFile("("..world..") is wrong id")
                 wrong = false
-                print("["..pcallBot.."]"..world.." is wrong door id, skipped world")
-                customizable.botStatics("("..world..") is wrong door id, skipped world","Script Status : Running")
+                customizable.writeFile(world..' : is wrong id')
+                customizable.tableFormatted(string.sub(world,1,3)..' : Wrong')
+                print(pcallBot..'. '..world..' : is wrong door id, skipped world')
+                customizable.initializeBots(world.. ' : is wrong door id, skipped world')
             end
         else
-            customizable.writeFile("("..world..") is NUKED !!")
             nuked = false
-            print("["..pcallBot.."]"..world.." is NUKED!, check ur world !!")
-            customizable.botStatics("("..world..") is NUKED!, check ur world !!","Script Status : Running")
+            customizable.writeFile(world..' : Nuked')
+            customizable.tableFormatted(string.sub(world,1,3)..' : Nuked')
+            print(pcallBot..'. '..world..' is Nuked, Skipped world')
+            customizable.initializeBots(world..' : is Nuked, Skipped world.')
         end
     end
-    customizable.botStatics("("..getBot().name..") Already finished all world, Terminated script!","Script Status : Stopped, Reason : Already finished all world")
-    customizable.initializeBots()
+    customizable.initializeBots(''..bot.name..' finished all world, Script terminated.')
+    print(pcallBot..'. finished all world, Script terminated.')
     if removingbot then
         removeBot()
         sleep(2000)
     else
-        customizable.warp(customizable.randomLetter(),"")
+        customizable.warp(customizable.randomLetter(),'')
     end
-    getBot().auto_collect = false
-    customizable.notifications("["..pcallBot.."]Finished all worlds")
+    customizable.localInfo()
+    customizable.notifications(pcallBot..'. finished all world, terminated script!')
 else
-    customizable.botStatics("Script Harvest made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq","Script Status : Stopped, Reason : Reseller Idiot")
-    customizable.notifications("["..pcallBot.."]Script Harvest made by Caramoy's Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq")
+    print(pcallBot..'. Script Harvest made by Caramoy Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq, Reseller IDIOT !!')
+    customizable.initializeBots('Script Harvest made by Caramoy Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq, Reseller IDIOT !!')
+    customizable.notifications(pcallBot..'. Script Harvest made by Caramoy Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq, Reseller IDIOT !!')
 end
