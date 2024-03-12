@@ -1266,7 +1266,7 @@ customizable.onBackup = function(threads)
             sleep(delayreconnect * 1000)
             if bot.status == BotStatus.account_banned then
                 initialize[thread] = 'Suspended'
-                customizable.writeFile('switchStatus','['..bot.name..'] status is Suspended')
+                customizable.writeFile2('switchStatus','['..bot.name..'] status is Suspended')
                 customizable.initializeBots('Bot status is suspended, changing bot switch.')
                 customizable.indexBackup = customizable.indexBackup + 1
                 if customizable.indexBackup > #botBackup then
@@ -1303,6 +1303,12 @@ end
 
 customizable.writeFile = function(threads)
     local file = io.open('WorldStatus.txt','a')
+    file:write(threads..'\n')
+    file:close()
+end
+
+customizable.writeFile2 = function(title,threads)
+    local file = io.open(title..'.txt','a')
     file:write(threads..'\n')
     file:close()
 end
