@@ -1,3 +1,4 @@
+
 for i, bot in pairs(getBots()) do
     if getBot().name:upper() == bot.name:upper() then
         pcallBot = i
@@ -147,7 +148,7 @@ customizable.onInventory = function(world,id,log)
         end
         printed:append(log)
         customizable.warp(world,id)
-        customizable.localInfo()
+        customizable.localInfo(log)
         bot.auto_collect = true
     elseif autoSwitch and bot.level >= switchOnLevel then
         bot.auto_collect = false
@@ -158,9 +159,9 @@ customizable.onInventory = function(world,id,log)
             customizable.onSeed()
         end
         customizable.onBackup()
-        printed:append('Rechecking')
+        printed:append(log)
         customizable.warp(world,id)
-        customizable.localInfo()
+        customizable.localInfo(log)
         bot.auto_collect = true
     elseif inventory:getItemCount(block) >= amountBlock then
         if recycle then
@@ -169,27 +170,27 @@ customizable.onInventory = function(world,id,log)
             customizable.onBlock()
             printed:append(log)
             customizable.warp(world,id)
-            customizable.localInfo()
+            customizable.localInfo(log)
         end
         bot.auto_collect = true
     elseif customizable.detectTable(eventList,amountEvent) then
         customizable.onEvent()
         printed:append(log)
         customizable.warp(world,id)
-        customizable.localInfo()
+        customizable.localInfo(log)
         bot.auto_collect = true
     elseif inventory:getItemCount(customizable.seed) >= amountSeed then
         customizable.onSeed()
         printed:append(log)
         customizable.warp(world,id)
-        customizable.localInfo()
+        customizable.localInfo(log)
         bot.auto_collect = true
     elseif bot.gem_count >= mingems and buypack then
         customizable.buying()
         customizable.onPack()
         printed:append(log)
         customizable.warp(world,id)
-        customizable.localInfo()
+        customizable.localInfo(log)
         bot.auto_collect = true
     end
 end
@@ -245,43 +246,42 @@ customizable.tableFormatted = function(time)
     strFormatted = strFormatted .. time .. '\n'
 end
 
-customizable.globalInfo = function(values)
-    str = ''
-    if values == 'switch' then
-        if autoSwitch then
-            str = ''
-            for i = 1,#botBackup do
-                local switch = customizable.split(botBackup[i],'[^|]+')[1]
-                str = str..'\n||'..string.upper(switch)..'|| ('..(initialize[switch] or '?')..')'
+customizable.localInfo = function(info)
+    local globalInfo = function(values)
+        str = ''
+        if values == 'switch' then
+            if autoSwitch then
+                str = ''
+                for i = 1,#botBackup do
+                    local switch = customizable.split(botBackup[i],'[^|]+')[1]
+                    str = str..'\n||'..string.upper(switch)..'|| ('..(initialize[switch] or '?')..')'
+                end
+            else
+                return 'Not using switch'
             end
-        else
-            return 'Not using switch'
+        elseif values == 'block' then
+            for i = 1, #storageblock do
+                local world = customizable.split(storageblock[i],'[^|]+')[1]
+                str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
+            end
+        elseif values == 'seed' then
+            for i = 1, #storageseed do
+                local world = customizable.split(storageseed[i],'[^|]+')[1]
+                str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
+            end
+        elseif values == 'packevent' then
+            for i = 1, #storagepack do
+                local world = customizable.split(storagepack[i],'[^|]+')[1]
+                str = str..'\nPack - '..i..' : '..(initialize[world] or '?')..''
+            end
+            
+            for i = 1, #storageevent do
+                local world = customizable.split(storageevent[i],'[^|]+')[1]
+                str = str..'\nEvent - '..i..' : '..(initialize[world] or '?')..''
+            end
         end
-    elseif values == 'block' then
-        for i = 1, #storageblock do
-            local world = customizable.split(storageblock[i],'[^|]+')[1]
-            str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
-        end
-    elseif values == 'seed' then
-        for i = 1, #storageseed do
-            local world = customizable.split(storageseed[i],'[^|]+')[1]
-            str = str..'\n||'..string.upper(world)..'|| : '..(initialize[world] or '?')..''
-        end
-    elseif values == 'packevent' then
-        for i = 1, #storagepack do
-            local world = customizable.split(storagepack[i],'[^|]+')[1]
-            str = str..'\nPack - '..i..' : '..(initialize[world] or '?')..''
-        end
-        
-        for i = 1, #storageevent do
-            local world = customizable.split(storageevent[i],'[^|]+')[1]
-            str = str..'\nEvent - '..i..' : '..(initialize[world] or '?')..''
-        end
+        return str
     end
-    return str
-end
-
-customizable.localInfo = function()
 	if linkbotinfo ~= 'x' then
         realtime = os.time() - customizable.formatTime
         for idx, val in pairs(reversed) do
@@ -290,12 +290,17 @@ customizable.localInfo = function()
             webhook.embed2.use = true
             webhook.embed1.title = 'Caramoy Syndicate [https://discord.com/invite/fTTKW8vvuq]'
             webhook.embed1.color = math.random(111111,999999)
-            webhook.embed1:addField('','```Botname : ['..bot.level..']'..string.upper(bot.name)..'\nGems : '..bot.gem_count..'\nCurrent : '..string.upper(bot:getWorld().name)..'\nStatus : '..customizable.initBot()..'\nRuntime : '..math.floor(realtime/86400)..' Days '..math.floor(realtime%86400/3600)..' Hours '..math.floor(realtime%86400%3600/60)..' Minutes```',false)
-            webhook.embed1:addField('BLOCK',customizable.globalInfo('block'),true)
-            webhook.embed1:addField('SEED',customizable.globalInfo('seed'),true)
-            webhook.embed1:addField('PACK & EVENT',customizable.globalInfo('packevent'),true)
+            webhook.embed1:addField('','Script running for **'..math.floor(realtime/86400)..' Days '..math.floor(realtime%86400/3600)..' Hours '..math.floor(realtime%86400%3600/60)..' Minutes**',false)
+            webhook.embed1:addField('Bot Task',info,true)
+            webhook.embed1:addField('Bot Name','['..bot.level..'] '..string.upper(bot.name),true)
+            webhook.embed1:addField('Bot Gems',bot.gem_count,true)
+            webhook.embed1:addField('Bot Current',getWorld().name,true)
+            webhook.embed1:addField('Bot Status',customizable.initBot(),true)
+            webhook.embed1:addField('Bot Switch',globalInfo('switch'),true)
+            webhook.embed1:addField('Storage Block',globalInfo('block'),true)
+            webhook.embed1:addField('Storage Seed',globalInfo('seed'),true)
+            webhook.embed1:addField('Storage Pack & Event',globalInfo('packevent'),true)
             webhook.embed2:addField('Farm Estimates',strFormatted,true)
-            webhook.embed2:addField('Bot Switch',customizable.globalInfo('switch'),true)
             webhook.embed2.footer.text = '[Lucifer] : Harvest Script\nLast update : '..(os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60))..''
             webhook:edit(val)
         end    
@@ -364,7 +369,7 @@ customizable.warp = function(world,door)
         name = name .. '|' ..door
     end
     if not bot:isInWorld(world:upper()) then
-        local count = 0
+        count = 0
         addEvent(Event.variantlist, function(variant, netid)
             if variant:get(0):getString() == 'OnConsoleMessage' then
                 if variant:get(1):getString():lower():find('inaccessible.') or variant:get(1):getString():lower():find('unknown reason.') then
@@ -396,9 +401,9 @@ customizable.warp = function(world,door)
             listenEvents(4)
             sleep(delaywarp * 1000)
             count = count + 1
-            if count == 5 then
+            if count == hardWarpCount then
                 count = 0
-                customizable.textInfo('',': Maybe hard warp?, disconnecting bot and sleeping for '..delayidiotserver..' minutes')
+                customizable.textInfo('','Maybe hard warp?, disconnecting bot and sleeping for '..delayidiotserver..' minutes')
                 bot:disconnect()
                 sleep(delayidiotserver * 60000)
             end
@@ -1082,7 +1087,7 @@ customizable.onBackup = function()
                         removeBot()
                         sleep(2000)
                     end
-                    customizable.localInfo()
+                    customizable.localInfo('No more bots to switch, sc terminated')
                     customizable.textInfo('stop','No more bots to switch, sc terminated')
                 end
                 goto BACK
@@ -1101,7 +1106,7 @@ customizable.onBackup = function()
                     removeBot()
                     sleep(2000)
                 end
-                customizable.localInfo()
+                customizable.localInfo('No more bots to switch, sc terminated')
                 customizable.textInfo('stop','No more bots to switch, sc terminated')
             end
             goto BACK
@@ -1114,7 +1119,7 @@ customizable.mainScript = function(init,id)
     if not maxfind then
         if not nuked then
             if not wrong then
-                customizable.localInfo()
+                customizable.localInfo('Harvesting')
                 formattedTime = os.time()
                 customizable.harvestWorld(init,id)
                 for i = 1, recheckCount do
@@ -1164,7 +1169,7 @@ if Information == 'Script Harvest made by Caramoy Syndicate, Link Discord : http
     else
         customizable.warp(customizable.randomLetter(14),'')
     end
-    customizable.localInfo()
+    customizable.localInfo('finished all world, terminated script!')
     customizable.textInfo('stop','finished all world, terminated script!')
 else
     customizable.textInfo('stop','Script Harvest made by Caramoy Syndicate, Link Discord : https://discord.com/invite/fTTKW8vvuq, Reseller IDIOT !!')
