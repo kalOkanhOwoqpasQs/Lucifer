@@ -1086,7 +1086,7 @@ local mainScript = function(init,id,tiles)
                 while countFloating(block) > 0 do
                     loopingObj(init,id,block)
                 end
-                while countFloating(112) > 0 do
+                while countFloating(112) > 0 and not ignoregems do
                     loopingObj(init,id,112)
                 end
                 formattedTime = os.time() - formattedTime
