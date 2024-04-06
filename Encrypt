@@ -93,7 +93,7 @@ local function readFile(fileContents, fileNames)
     for i, fileName in ipairs(fileNames) do
         local file = io.open(fileName, 'r')
         if not file then
-            notifications('Fail to open file '..fileName..'.')
+            notifications('stop','Fail to open file '..fileName..'.')
             return nil
         else
             local fileContent = {}
@@ -299,6 +299,7 @@ localInfo = function(info)
             webhook.embed1.use = true
             webhook.embed2.use = true
             webhook.embed1.thumbnail = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077262082068/Hnet.com-image.jpg?ex=661e7947&is=660c0447&hm=e692ab165629d6a84ca2661b5b4a75f97a23cfabb98983fda3270bc2be0e7474&'
+            webhook.embed1:addField('','Updated : '..(os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60)),false)
             webhook.embed1:addField("Bot Task",info,false)
             webhook.embed1:addField("Bot Name",'||'..string.sub(bot.name,1,5)..'||',true)
             webhook.embed1:addField('Bot Current','||'..string.sub(getWorld().name,1,5)..'||',true)
