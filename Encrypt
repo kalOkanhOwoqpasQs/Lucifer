@@ -1,4 +1,3 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -93,7 +92,8 @@ local function readFile(fileContents, fileNames)
     for i, fileName in ipairs(fileNames) do
         local file = io.open(fileName, 'r')
         if not file then
-            notifications('stop','Fail to open file '..fileName..'.')
+            notifications('Fail to open file '..fileName..'.')
+            error('Fail to open file '..fileName..'.')
             return nil
         else
             local fileContent = {}
