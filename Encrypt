@@ -84,7 +84,9 @@ notifications = function(desc)
 end
 
 isHarvested = function(ex,ye)
-    return getTile(ex,ye).fg == customizable.seed and getTile(ex,ye):canHarvest() and bot:getWorld():hasAccess(ex,ye) > 0 and getTile(ex,ye).flags < 4096
+    if bot:isInWorld() then
+        return getTile(ex,ye).fg == customizable.seed and getTile(ex,ye):canHarvest() and bot:getWorld():hasAccess(ex,ye) ~= 0 and getTile(ex,ye).flags < 4096
+    end
 end
 
 local function readFile(fileContents, fileNames)
@@ -387,19 +389,17 @@ reconnect = function(world,id,x,y)
             sleep(delaywarp * 1000)
         end
         removeEvent(Event.variantlist)
-    end
-    if bot:isInWorld(world:upper()) then
-        if id ~= '' then
-            while getTile(bot.x,bot.y).fg == 6 do
-                bot:warp(world:upper(),id:upper())
-                sleep(delaywarp * 1000)
-            end
+    end 
+    if (bot:isInWorld() and (id ~= '')) or (getTile(bot.x,bot.y).fg == 6 and (bot:isInWorld() and id ~= '')) then
+        while getTile(bot.x,bot.y).fg == 6 do
+            bot:warp(world:upper(),id:upper())
+            sleep(delaywarp * 1000)
         end
-        if x and y then
-            while bot.x ~= x or bot.y ~= y do
-                bot:findPath(x,y)
-                sleep(150)
-            end
+    end
+    if x and y then
+        while bot.x ~= x or bot.y ~= y do
+            bot:findPath(x,y)
+            sleep(150)
         end
     end
 end
@@ -460,13 +460,28 @@ joinRandom = function()
                     reconnect(value,'')
                 else
                     nuked = false
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     textInfo('stop','World clearing history has nuked, Script terminated.')
                 end
             else
                 maxfind = false
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 textInfo('stop','Too many creating worlds today, Script terminated.')
             end
         end
+    end
+    if offAfterJoinRandom then
+        while bot.status == BotStatus.online do
+            bot:disconnect()
+            sleep(5000)
+        end
+        clientStatus()
     end
 end
 
@@ -506,11 +521,13 @@ onEvent = function(thread,id)
                     customizable.indexEvent = 0
                     if customizable.variableEvent > #storageevent then
                         initialize[world] = itemFloat(eventList[1])..'x [LIMIT]'
+                        while bot:isInWorld() and bot.status == BotStatus.online do
+                            bot:leaveWorld()
+                            sleep(5000)
+                        end
                         if removingbot then
                             removeBot()
                             sleep(2000)
-                        else
-                            warp(strGenerate,'')
                         end
                         localInfo('All events storage has reached limit')
                         textInfo('stop','All events storage has reached limit, Script terminated.')
@@ -555,11 +572,13 @@ onEvent = function(thread,id)
                 customizable.variableEvent = customizable.variableEvent + 1
                 customizable.indexEvent = 0
                 if customizable.variableEvent > #storageevent then
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     if removingbot then
                         removeBot()
                         sleep(2000)
-                    else
-                        warp(strGenerate,'')
                     end
                     localInfo('All events storage has reached limit')
                     textInfo('stop','All events storage has reached limit')
@@ -572,11 +591,13 @@ onEvent = function(thread,id)
             customizable.variableEvent = customizable.variableEvent + 1
             customizable.indexEvent = 0
             if customizable.variableEvent > #storageevent then
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 if removingbot then
                     removeBot()
                     sleep(2000)
-                else
-                    warp(strGenerate,'')
                 end
                 localInfo('All events storage has reached limit')
                 textInfo('stop','All events storage has reached limit')
@@ -605,11 +626,13 @@ onPack = function(thread,id)
                     customizable.indexPack = 0
                     if customizable.variablePack > #storagepack then
                         initialize[world] = itemFloat(packList[1])..'x [LIMIT]'
+                        while bot:isInWorld() and bot.status == BotStatus.online do
+                            bot:leaveWorld()
+                            sleep(5000)
+                        end
                         if removingbot then
                             removeBot()
                             sleep(2000)
-                        else
-                            warp(strGenerate,'')
                         end
                         localInfo('All packs storage has reached limit')
                         textInfo('stop','All packs storage has reached limit')
@@ -654,11 +677,13 @@ onPack = function(thread,id)
                 customizable.variablePack = customizable.variablePack + 1
                 customizable.indexPack = 0
                 if customizable.variablePack > #storagepack then
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     if removingbot then
                         removeBot()
                         sleep(2000)
-                    else
-                        warp(strGenerate,'')
                     end
                     localInfo('All packs storage has reached limit')
                     textInfo('stop','All packs storage has reached limit')
@@ -671,11 +696,13 @@ onPack = function(thread,id)
             customizable.variablePack = customizable.variablePack + 1
             customizable.indexPack = 0
             if customizable.variablePack > #storagepack then
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 if removingbot then
                     removeBot()
                     sleep(2000)
-                else
-                    warp(strGenerate,'')
                 end
                 localInfo('All packs storage has reached limit')
                 textInfo('stop','All packs storage has reached limit')
@@ -704,11 +731,13 @@ onSeed = function(thread,id)
                     customizable.indexSeed = 0
                     if customizable.variableSeed > #storageseed then
                         initialize[world] = itemFloat(customizable.seed)..'x [LIMIT]'
+                        while bot:isInWorld() and bot.status == BotStatus.online do
+                            bot:leaveWorld()
+                            sleep(5000)
+                        end
                         if removingbot then
                             removeBot()
                             sleep(2000)
-                        else
-                            warp(strGenerate,'')
                         end
                         localInfo('All seeds storage has reached limit')
                         textInfo('stop','All seeds storage has reached limit')
@@ -751,11 +780,13 @@ onSeed = function(thread,id)
                 customizable.variableSeed = customizable.variableSeed + 1
                 customizable.indexSeed = 0
                 if customizable.variableSeed > #storageseed then
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     if removingbot then
                         removeBot()
                         sleep(2000)
-                    else
-                        warp(strGenerate,'')
                     end
                     localInfo('All seeds storage has reached limit')
                     textInfo('stop','All seeds storage has reached limit')
@@ -768,11 +799,13 @@ onSeed = function(thread,id)
             customizable.variableSeed = customizable.variableSeed + 1
             customizable.indexSeed = 0
             if customizable.variableSeed > #storageseed then
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 if removingbot then
                     removeBot()
                     sleep(2000)
-                else
-                    warp(strGenerate,'')
                 end
                 localInfo('All seeds storage has reached limit')
                 textInfo('stop','All seeds storage has reached limit')
@@ -801,11 +834,13 @@ onBlock = function(thread,id)
                     customizable.indexBlock = 0
                     if customizable.variableBlock > #storageblock then
                         initialize[world] = itemFloat(block)..'x [LIMIT]'
+                        while bot:isInWorld() and bot.status == BotStatus.online do
+                            bot:leaveWorld()
+                            sleep(5000)
+                        end
                         if removingbot then
                             removeBot()
                             sleep(2000)
-                        else
-                            warp(strGenerate,'')
                         end
                         localInfo('All blocks storage has reached limit')
                         textInfo('stop','All blocks storage has reached limit')
@@ -848,11 +883,13 @@ onBlock = function(thread,id)
                 customizable.variableBlock = customizable.variableBlock + 1
                 customizable.indexBlock = 0
                 if customizable.variableBlock > #storageblock then
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     if removingbot then
                         removeBot()
                         sleep(2000)
-                    else
-                        warp(strGenerate,'')
                     end
                     localInfo('All blocks storage has reached limit')
                     textInfo('stop','All blocks storage has reached limit')
@@ -865,11 +902,13 @@ onBlock = function(thread,id)
             customizable.variableBlock = customizable.variableBlock + 1
             customizable.indexBlock = 0
             if customizable.variableBlock > #storageblock then
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 if removingbot then
                     removeBot()
                     sleep(2000)
-                else
-                    warp(strGenerate,'')
                 end
                 localInfo('All blocks storage has reached limit')
                 textInfo('stop','All blocks storage has reached limit')
@@ -909,10 +948,18 @@ wearingItemEvent = function(thread,id)
             end
         else
             wrong = false
+            while bot:isInWorld() and bot.status == BotStatus.online do
+                bot:leaveWorld()
+                sleep(5000)
+            end
             textInfo('stop','Id door world take support items is wrong, check ur id door! Terminated script.')
         end
     else
         nuked = false
+        while bot:isInWorld() and bot.status == BotStatus.online do
+            bot:leaveWorld()
+            sleep(5000)
+        end
         textInfo('stop','World take support items is nuked, check ur world! Terminated script.')
     end
     bot.collect_range = range
@@ -941,6 +988,10 @@ onBackup = function(world,id)
                 textInfo('','Bot : '..thread..' is suspended, skipped bot')
                 customizable.indexBackup = customizable.indexBackup + 1
                 if customizable.indexBackup > #botBackup then
+                    while bot:isInWorld() and bot.status == BotStatus.online do
+                        bot:leaveWorld()
+                        sleep(5000)
+                    end
                     if removingbot then
                         removeBot()
                         sleep(2000)
@@ -960,6 +1011,10 @@ onBackup = function(world,id)
             initialize[thread] = 'Reached max level'
             customizable.indexBackup = customizable.indexBackup + 1
             if customizable.indexBackup > #botBackup then
+                while bot:isInWorld() and bot.status == BotStatus.online do
+                    bot:leaveWorld()
+                    sleep(5000)
+                end
                 if removingbot then
                     removeBot()
                     sleep(2000)
@@ -1049,7 +1104,7 @@ end
 local mainScript = function(init,id,tiles)
     local loopingObj = function(world,door,id)
         for _, obj in pairs(bot:getWorld():getObjects()) do
-            if obj.id == id then
+            if obj.id == id and #bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) ~= 0 then
                 bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                 sleep(30)
                 reconnect(world,door,math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
@@ -1060,7 +1115,7 @@ local mainScript = function(init,id,tiles)
     local countFloating = function(id)
         local count = 0
         for _, obj in pairs(bot:getWorld():getObjects()) do
-            if obj.id == id and #bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) > 0 then
+            if obj.id == id and #bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) ~= 0 then
                 count = count + 1
             end
         end
@@ -1084,10 +1139,10 @@ local mainScript = function(init,id,tiles)
                 while countTree(tiles) > 0 do
                     harvest(init,id,tiles)
                 end
-                while countFloating(block) > 0 do
+                while countFloating(block) >= minimumFloat do
                     loopingObj(init,id,block)
                 end
-                while countFloating(112) > 0 and not ignoregems do
+                while countFloating(112) >= minimumFloat and not ignoregems do
                     loopingObj(init,id,112)
                 end
                 formattedTime = os.time() - formattedTime
@@ -1102,6 +1157,10 @@ local mainScript = function(init,id,tiles)
         end
     else
         maxfind = false
+        while bot:isInWorld() and bot.status == BotStatus.online do
+            bot:leaveWorld()
+            sleep(5000)
+        end
         textInfo('stop',bot.name..' too many finding worlds today, terminated script')
     end
 end
@@ -1124,11 +1183,13 @@ if Information == 'Script Harvest made by Caramoy Syndicate, Link Discord : http
             mainScript(worlds,doors,tiles)
         end
     end
+    while bot:isInWorld() and bot.status == BotStatus.online do
+        bot:leaveWorld()
+        sleep(5000)
+    end
     if removingbot then
         removeBot()
         sleep(2000)
-    else
-        warp(strGenerate,'')
     end
     localInfo('finished all world, terminated script!')
     textInfo('stop','finished all world, terminated script!')
