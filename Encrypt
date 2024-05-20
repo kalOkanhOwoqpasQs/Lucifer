@@ -469,7 +469,7 @@ countFloating = function(world,door,itm)
     warp(world,door)
     if not nuked and not wrong and not maxfind then
         for _, obj in pairs(bot:getWorld():getObjects()) do
-            if obj.id == itm and (#bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) > 0) then
+            if obj.id == itm and (#bot:getPath((obj.x + 10) / 32,(obj.y + 10) / 32) > 0) then
                 count = count + 1
             end
         end
