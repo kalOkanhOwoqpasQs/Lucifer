@@ -452,11 +452,12 @@ end
 loopingObj = function(world,door,itm)
     warp(world,door)
     if not nuked and not wrong and not maxfind then
+        bot.auto_collect = true
         for _, obj in pairs(bot:getWorld():getObjects()) do
-            if obj.id == itm and (#bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) > 0) then
-                bot:findPath(math.floor((obj.x + 10) // 32), math.floor((obj.y + 10) // 32))
+            if obj.id == itm and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
+                bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                 sleep(30)
-                reconnect(world,door,math.floor((obj.x + 10) // 32), math.floor((obj.y + 10) // 32))
+                reconnect(world,door,math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
             end
             inventoryItems(world,door)
         end
@@ -887,12 +888,12 @@ wearingItemEvent = function(thread,id)
         if not wrong then
             if inventory:getItemCount(idItemSupport) == 0 and itemFloat(idItemSupport) >= keepItemSupport then
                 for _, obj in pairs(bot:getWorld():getObjects()) do
-                    if obj.id == idItemSupport and (#bot:getPath((obj.x + 10) // 32,(obj.y + 10) // 32) > 0) then
-                        bot:findPath(math.floor((obj.x + 10) // 32), math.floor((obj.y + 10) // 32))
+                    if obj.id == idItemSupport and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
+                        bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                         sleep(100)
                         bot:collect(range)
                         sleep(1000)
-                        reconnect(world,door,math.floor((obj.x + 10) // 32), math.floor((obj.y + 10) // 32))
+                        reconnect(world,door,math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                     end
                     if inventory:getItemCount(idItemSupport) > 0 then
                         break
