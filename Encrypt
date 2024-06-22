@@ -82,7 +82,9 @@ readFile = function(fileName)
     local tbl = {}
     local file = io.open(fileName, 'r')
     if not file then
-        notifications('Fail to open ' .. fileName .. ' file.')
+        if sendNotif then
+            notifications('Fail to open ' .. fileName .. ' file.')
+        end
         error('Failed to open file : ' .. fileName)
     else
         for line in file:lines() do
@@ -257,6 +259,21 @@ globalInfo = function(values)
     return str
 end
 
+countStatus = function(case)
+    local count = 0
+    for _, client in pairs(getBots()) do
+        if case == 'offline' then
+            if client.status ~= BotStatus.online then
+                count = count + 1
+            end
+        else
+            if client.status == BotStatus.account_banned then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
 
 localInfo = function(info)
 	if linkbotinfo ~= 'x' then
@@ -274,10 +291,13 @@ localInfo = function(info)
         webhook.embed1:addField('Bot Level', bot.level, true)
         webhook.embed1:addField('Bot Age', bot:getAge() .. ' Days', true)
         webhook.embed1:addField('Bot Uptime', math.floor(realtime/86400) .. ':' .. math.floor(realtime%86400/3600) .. ':' .. math.floor(realtime%86400%3600/60) .. '', true)
+        webhook.embed1:addField('Total Bots', #getBots(), true)
+        webhook.embed1:addField('Total Offline', countStatus('offline'), true)
+        webhook.embed1:addField('Total Banned', countStatus('banned'), true)
+        webhook.embed1:addField('Storage Block', globalInfo('block'), false)
         webhook.embed1:addField('Storage Seed', globalInfo('seed'), true)
         webhook.embed1:addField('Storage Pack', globalInfo('pack'), true)
         webhook.embed1:addField('Storage Event', globalInfo('event'), true)
-        webhook.embed1:addField('Storage Block', globalInfo('block'), false)
         webhook.embed2:addField('Farm Estimates', strFormatted, true)
         webhook.embed2:addField('Switch Account', globalInfo('switch'), true)
         webhook.embed2.footer.icon_url = 'https://cdn.discordapp.com/attachments/1222249842387193876/1224708077706543236/1712025730898.jpg?ex=661e7947&is=660c0447&hm=3be9efe2f0f23456f272149dc0844db884cee12f3b21199b35b2c1287c77a8f2&'
@@ -289,7 +309,9 @@ end
 clientContent = function(text)
     if webhookstatuslink ~= 'x'  then
         local webhook = Webhook.new(webhookstatuslink)
-        webhook.content = '@everyone'
+        if tagDiscord then
+            webhook.content = '@everyone'
+        end
         webhook.embed1.use = true
         webhook.embed1:addField('', text, false)
         webhook.embed1.footer.text = 'Webhook Status, sent at : ' .. (os.date('!%a %b %d, %Y at %I:%M %p', os.time() + 7 * 60 * 60)) .. ''
@@ -301,7 +323,9 @@ textInfo = function(str, alphabet)
     printed:append(alphabet)
     clientContent('(' .. string.upper(bot.name) .. ') ' .. alphabet)
     if str == 'stop' then
-        notifications(string.upper(bot.name) .. ' : ' .. alphabet)
+        if sendNotif then
+            notifications(string.upper(bot.name) .. ' : ' .. alphabet)
+        end
         error(alphabet)
     end
 end
@@ -953,7 +977,7 @@ wearingItemEvent = function(thread, id)
                         sleep(100)
                         reconnect(world, door, math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                     end
-                    if inventory:getItemCount(idItemSupport) > 0 then
+                    if inventory:getItemCount(idItemSupport) >= keepItemSupport then
                         break
                     end
                 end
@@ -1068,7 +1092,7 @@ inventoryItems = function(thread, id)
         while inventory:getItemCount(idItemSupport) == 0 do
             wearingItemEvent(thread, id)
         end
-    elseif bot.level >= switchOnLevel then
+    elseif switchOnLevel ~= 0 and bot.level >= switchOnLevel then
         if autoSwitch then
             droppingItems(thread, id)
             onBackup(thread, id)
