@@ -962,7 +962,7 @@ onBlock = function(thread, id)
     shortcut(thread, id)
 end
 
-wearingItemEvent = function(thread, id)
+wearingItemEvent = function()
     printed:append('Take support items')
     world = splitPattern(worldwearitem[customizable.index], '[^|]+')[1]
     door = splitPattern(worldwearitem[customizable.index], '[^|]+')[2]
@@ -978,6 +978,7 @@ wearingItemEvent = function(thread, id)
                         reconnect(world, door, math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                     end
                     if inventory:getItemCount(idItemSupport) >= keepItemSupport then
+                        bot.auto_collect = false
                         break
                     end
                 end
@@ -1003,7 +1004,6 @@ wearingItemEvent = function(thread, id)
         nuked = false
         activityDesc('World take support items is nuked, check ur world! Terminated script.')
     end
-    shortcut(thread, id)
 end
 
 onBackup = function(world, id)
@@ -1092,6 +1092,7 @@ inventoryItems = function(thread, id)
         while inventory:getItemCount(idItemSupport) == 0 do
             wearingItemEvent(thread, id)
         end
+        shortcut(thread, id)
     elseif switchOnLevel ~= 0 and bot.level >= switchOnLevel then
         if autoSwitch then
             droppingItems(thread, id)
