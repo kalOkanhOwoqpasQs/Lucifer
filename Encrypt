@@ -339,7 +339,13 @@ detectTable = function(items, amt)
     return false
 end
 
-clientStatus = function()
+clientStatus = function(world, door)
+    local name
+    local doorId
+    if world and door then
+        name = world
+        door = doorId
+    end
     if bot.status ~= BotStatus.online then
         bot.auto_reconnect = false
         textInfo('', 'status is ' .. clientStatic() .. ', Current : ' .. getWorld().name .. '')
@@ -349,7 +355,7 @@ clientStatus = function()
             sleep(delayreconnect * 1000)
             if bot.status == BotStatus.account_banned then
                 if switchOnSuspend then
-                    onBackup(world, id)
+                    onBackup(name, doorId)
                 else
                     textInfo('stop', 'status is ' .. clientStatic() .. '')
                 end
@@ -1054,7 +1060,9 @@ onBackup = function(world, id)
         end
         if bot.status == BotStatus.online and bot.level < switchOnLevel then
             initialize[thread] = 'Used'
-            customizable.indexBackup = customizable.indexBackup + 1
+            if not customizable.indexBackup > #botBackup then
+                customizable.indexBackup = customizable.indexBackup + 1
+            end
             break
         elseif bot.status == BotStatus.online and bot.level >= switchOnLevel then
             initialize[thread] = 'Reached max level'
