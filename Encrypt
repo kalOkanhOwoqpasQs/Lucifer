@@ -1,4 +1,3 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -344,7 +343,7 @@ clientStatus = function(world, door)
     local doorId
     if world and door then
         name = world
-        door = doorId
+        doorId = door
     end
     if bot.status ~= BotStatus.online then
         bot.auto_reconnect = false
