@@ -1,3 +1,4 @@
+
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -446,7 +447,7 @@ end
 countFloating = function(itm)
     local count = 0
     for _, obj in pairs(bot:getWorld():getObjects()) do
-        if obj.id == id and #getBot():getPath(math.floor(obj.x / 32), math.floor(obj.y / 32)) ~= 0 then
+        if obj.id == itm and (#getBot():getPath(math.floor(obj.x / 32), math.floor(obj.y / 32)) ~= 0) then
             count = count + obj.count
         end
     end
