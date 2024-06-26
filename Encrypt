@@ -1205,10 +1205,12 @@ end
 
 collectFloat = function(worlds, id, itm)
     while countFloating(itm) > 0 do
-        bot:collectByID(itm)
-        sleep(100)
-        reconnect(worlds, id, bot.x, bot.y)
-        inventoryItems(worlds, id)
+        while bot:collectByID(itm) do
+            sleep(100)
+            reconnect(worlds, id, bot.x, bot.y)
+            sleep(100)
+            inventoryItems(worlds, id)
+        end
     end
 end
 
