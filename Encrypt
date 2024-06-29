@@ -984,7 +984,6 @@ wearingItemEvent = function()
                         reconnect(world, door, math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
                     end
                     if inventory:getItemCount(idItemSupport) >= keepItemSupport then
-                        bot.auto_collect = false
                         break
                     end
                 end
@@ -993,6 +992,7 @@ wearingItemEvent = function()
                 bot:wear(idItemSupport)
                 bot:setDirection(true)
                 sleep(300)
+                bot.auto_collect = false
                 while inventory:getItemCount(idItemSupport) > keepItemSupport do
                     bot:drop(idItemSupport, inventory:getItemCount(idItemSupport) - keepItemSupport)
                     sleep(delaydrop*1000)
@@ -1205,12 +1205,15 @@ end
 
 collectFloat = function(worlds, id, itm)
     while countFloating(itm) > 0 do
-        while bot:collectByID(itm) do
-            sleep(100)
-            reconnect(worlds, id, bot.x, bot.y)
-            sleep(100)
-            inventoryItems(worlds, id)
+        for _, obj in pairs(bot:getWorld():getObjects()) do
+            if obj.id == itm and (#getBot():getPath(math.floor(obj.x / 32), math.floor(obj.y / 32)) ~= 0) then
+                bot:findPath(math.floor(obj.x / 32), math.floor(obj.y / 32))
+                sleep(100)
+                reconnect(worlds, id, math.floor(obj.x / 32), math.floor(obj.y / 32))
+                break
+            end
         end
+        inventoryItems(worlds, id)
     end
 end
 
@@ -1227,7 +1230,9 @@ mainScript = function(worlds, id)
                 end
                 collectFloat(worlds, id, block)
                 collectFloat(worlds, id, seed)
-                collectFloat(worlds, id, 112)
+                if not ignoregems then
+                    collectFloat(worlds, id, 112)
+                end
                 formattedTime = os.time() - formattedTime
                 tableFormatted(string.sub(worlds, 1, 3) .. ' | ' .. (math.floor(formattedTime/60) .. ' Minutes'))
             else
