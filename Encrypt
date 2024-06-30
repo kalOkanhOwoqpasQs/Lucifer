@@ -1,4 +1,3 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
@@ -968,6 +967,15 @@ onBlock = function(thread, id)
     shortcut(thread, id)
 end
 
+botsWearItem = function()
+    if bot:isInWorld() then
+        while inventory:getItemCount(idItemSupport) > 0 and not inventory:getItem(idItemSupport).isActive do
+            bot:wear(idItemSupport)
+            sleep(500)
+        end
+    end
+end
+
 wearingItemEvent = function()
     printed:append('Take support items')
     world = splitPattern(worldwearitem[customizable.index], '[^|]+')[1]
@@ -989,7 +997,7 @@ wearingItemEvent = function()
                 end
                 bot:moveRight()
                 sleep(500)
-                bot:wear(idItemSupport)
+                botsWearItem()
                 bot:setDirection(true)
                 sleep(300)
                 bot.auto_collect = false
