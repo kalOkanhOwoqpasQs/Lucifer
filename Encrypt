@@ -1,11 +1,12 @@
-
 local bot = getBot()
 local inventory = getBot():getInventory()
 local printed = getBot():getLog()
 local strGenerate = ''
+
 for i = 1, 10 do
     strGenerate = strGenerate .. string.char(math.random(97, 122))
 end
+
 strFormatted = 'no farm has been finished yet'
 local botBackup = {}
 local initialize = {}
@@ -53,6 +54,7 @@ bot.move_range = moveRange
 bot.move_interval = moveInterval
 bot.auto_reconnect = true
 bot.collect_range = range
+
 if ignoregems then
     bot.ignore_gems = true
 end
@@ -162,7 +164,6 @@ if fileExists(fileName) then
 end
 
 activityDesc = function(text)
-    localInfo(text)
     while bot:isInWorld() and bot.status == BotStatus.online do
         bot:leaveWorld()
         sleep(5000)
@@ -174,12 +175,13 @@ activityDesc = function(text)
     textInfo('stop', text)
 end
 
-itemRecycle = function()
+itemRecycle = function(world, door)
     if inventory:getItemCount(block) > 0 then
         bot:sendPacket(2, 'action|trash\n|itemID|' .. block)
-        sleep(500)
+        sleep(delayrecycle)
         bot:sendPacket(2, 'action|dialog_return\ndialog_name|trash_item\nitemID|' .. block .. '|\ncount|' .. inventory:getItemCount(block))
-        sleep(500)
+        sleep(delayrecycle)
+        reconnect(world, door)
     end
 end
 
@@ -593,7 +595,6 @@ onEvent = function(thread, id)
                     indexEventX = 0
                     table.remove(eventNum, i)
                     if #eventNum == 0 then
-                        initialize[world] = itemFloat(eventList[1]) .. 'x [LIMIT]'
                         activityDesc('All events storage has reached limit')
                     end
                 else
@@ -704,7 +705,6 @@ onPack = function(thread, id)
                     indexPackX = 0
                     table.remove(packNum, i)
                     if #packNum == 0 then
-                        initialize[world] = itemFloat(packList[1]) .. 'x [LIMIT]'
                         activityDesc('All packs storage has reached limit')
                     end
                 else
@@ -779,7 +779,6 @@ onPack = function(thread, id)
                 indexPackX = 0
                 table.remove(packNum, i)
                 if #packNum == 0 then
-                    initialize[world] = itemFloat(packList[1]) .. 'x [LIMIT]'
                     activityDesc('All packs storage has reached limit')
                 end
             end
@@ -790,7 +789,6 @@ onPack = function(thread, id)
             indexPackX = 0
             table.remove(packNum, i)
             if #packNum == 0 then
-                initialize[world] = itemFloat(packList[1]) .. 'x [LIMIT]'
                 activityDesc('All packs storage has reached limit')
             end
         end 
@@ -817,7 +815,6 @@ onSeed = function(thread, id)
                     indexSeedX = 0
                     table.remove(seedNum, i)
                     if #seedNum == 0 then
-                        initialize[world] = itemFloat(seed) .. 'x [LIMIT]'
                         activityDesc('All seeds storage has reached limit')
                     end
                 else
@@ -926,7 +923,6 @@ onBlock = function(thread, id)
                     indexBlockX = 0
                     table.remove(blockNum, i)
                     if #blockNum == 0 then
-                        initialize[world] = itemFloat(block) .. 'x [LIMIT]'
                         activityDesc('All blocks storage has reached limit')
                     end
                 else
@@ -1143,8 +1139,10 @@ saveFile = function(worlds, str)
 end
 
 droppingItems = function(thread, id)
-    if inventory:getItemCount(block) > 0 then
-        onBlock(thread, id)
+    if not recycle then
+        if inventory:getItemCount(block) > 0 then
+            onBlock(thread, id)
+        end
     end
     if inventory:getItemCount(seed) > 0 then
         onSeed(thread, id)
@@ -1170,7 +1168,7 @@ inventoryItems = function(thread, id)
         end
     elseif inventory:getItemCount(block) >= amountBlock then
         if recycle then
-            itemRecycle()
+            itemRecycle(thread, id)
         else
             onBlock(thread, id)
         end
@@ -1251,11 +1249,13 @@ rechecking = function(world, id)
         if isHarvested(tile.x, tile.y) then
             bot:findPath(tile.x, tile.y)
             sleep(100)
+            local count = 0
             reconnect(world, id, tile.x, tile.y)
-            while isHarvested(tile.x, tile.y) do
+            while isHarvested(tile.x, tile.y) and count < 25 do
                 bot:hit(tile.x, tile.y)
                 sleep(delayharvest)
                 reconnect(world, id, tile.x, tile.y)
+                count = count + 1
             end
         end
         inventoryItems(world, id)
@@ -1284,14 +1284,17 @@ mainScript = function(worlds, id)
             if not wrong then
                 formattedTime = os.time()
                 harvest(worlds, id)
-                while countTree(worlds, id) > 0 do
+                local count = 0
+                while countTree(worlds, id) > 0 and count < 30 do
                     rechecking(worlds, id)
+                    count = count + 1
                 end
                 collectFloat(worlds, id, block)
                 collectFloat(worlds, id, seed)
                 if not ignoregems then
                     collectFloat(worlds, id, 112)
                 end
+                droppingItems(worlds, id)
                 formattedTime = os.time() - formattedTime
                 tableFormatted(string.sub(worlds, 1, 3) .. ' | ' .. (math.floor(formattedTime/60) .. ' Minutes'))
             else
