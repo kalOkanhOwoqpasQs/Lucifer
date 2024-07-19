@@ -599,7 +599,7 @@ onEvent = function(thread, id)
                     end
                 else
                     for y, pack in pairs(eventList) do
-                        for i, tile in pairs(bot:getWorld():getTiles()) do
+                        for _, tile in pairs(bot:getWorld():getTiles()) do
                             ::BACK::
                             if posEvent ~= 0 then
                                 if checkPosObject(posEvent) == 0 then
@@ -628,7 +628,7 @@ onEvent = function(thread, id)
                                     end
                                 end
                             else
-                                if #bot:getPath(eventX + (indexEventX), eventY - (indexEventY)) > 0 then
+                                if getTile(eventX + (indexEventX), eventY - (indexEventY)).fg == 0 then
                                     bot:findPath(eventX + (indexEventX), eventY - (indexEventY))
                                     sleep(100)
                                     local count = 0
@@ -649,9 +649,6 @@ onEvent = function(thread, id)
                                             goto BACK
                                         end
                                     end
-                                else
-                                    indexEventX = indexEventX + 1
-                                    goto BACK
                                 end
                             end
                             if inventory:getItemCount(pack) == 0 then
@@ -709,7 +706,7 @@ onPack = function(thread, id)
                     end
                 else
                     for y, pack in ipairs(packList) do
-                        for i, tile in pairs(bot:getWorld():getTiles()) do
+                        for _, tile in pairs(bot:getWorld():getTiles()) do
                             ::BACK::
                             if posPack ~= 0 then
                                 if checkPosObject(posPack) == 0 then
@@ -738,7 +735,7 @@ onPack = function(thread, id)
                                     end
                                 end
                             else
-                                if #bot:getPath(packX + (indexPackX), packY - (indexPackY)) > 0 then
+                                if getTile(packX + (indexPackX), packY - (indexPackY)).fg == 0 then
                                     bot:findPath(packX + (indexPackX), packY - (indexPackY))
                                     sleep(100)
                                     reconnect(world, door, bot.x, bot.y)
@@ -759,9 +756,6 @@ onPack = function(thread, id)
                                             goto BACK
                                         end
                                     end
-                                else
-                                    indexPackX = indexPackX + 1
-                                    goto BACK
                                 end
                             end
                             if inventory:getItemCount(pack) == 0 then
@@ -847,7 +841,7 @@ onSeed = function(thread, id)
                                 end
                             end
                         else
-                            if #bot:getPath(seedX + (indexSeedX), seedY - (indexSeedY)) > 0 then
+                            if getTile(seedX + (indexSeedX), seedY - (indexSeedY)).fg == 0 then
                                 bot:findPath(seedX + (indexSeedX), seedY - (indexSeedY))
                                 sleep(100)
                                 local count = 0
@@ -868,9 +862,6 @@ onSeed = function(thread, id)
                                         goto BACK
                                     end
                                 end
-                            else
-                                indexSeedX = indexSeedX + 1
-                                goto BACK
                             end
                         end
                         if inventory:getItemCount(seed) == 0 then
@@ -955,7 +946,7 @@ onBlock = function(thread, id)
                                 end
                             end
                         else
-                            if #bot:getPath(blockX + (indexBlockX), blockY - (indexBlockY)) > 0 then
+                            if getTile(blockX + (indexBlockX), blockY - (indexBlockY)).fg == 0 then
                                 bot:findPath(blockX + (indexBlockX), blockY - (indexBlockY))
                                 sleep(100)
                                 local count = 0
@@ -976,9 +967,6 @@ onBlock = function(thread, id)
                                         goto BACK
                                     end
                                 end
-                            else
-                                indexBlockX = indexBlockX + 1
-                                goto BACK
                             end
                         end
                         if inventory:getItemCount(block) == 0 then
