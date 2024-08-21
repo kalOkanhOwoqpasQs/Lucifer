@@ -1,6 +1,7 @@
 local bot = getBot()
-local inventory = getBot():getInventory()
-local printed = getBot():getLog()
+
+inventory = bot:getInventory()
+printed = bot:getLog()
 local strGenerate = ''
 
 for i = 1, 10 do
@@ -208,7 +209,7 @@ setAuth = function()
     if withproxy then
         getProxyManager():setLimit(botperproxy)
         for idx, value in pairs(proxyList) do
-            getProxyManager():addProxy(value)
+            getProxyManageor():addProxy(value)
         end
     end
 end
@@ -1066,6 +1067,8 @@ onBackup = function(world, id)
             bot:updateBot(thread, threading)
         elseif typeaccount == 'guest' then
             bot:updateBot(strGenerate, thread, threading)
+        elseif typeaccount == 'ubi' then
+            bot:updateUbiBot(thread,threading,'',true)
         end
         sleep(delayloginbot * 1000)
         bot.auto_reconnect = false
@@ -1103,7 +1106,7 @@ onBackup = function(world, id)
         end
         if bot.status == BotStatus.online and bot.level < switchOnLevel then
             initialize[thread] = 'Used'
-            if not customizable.indexBackup > #botBackup then
+            if customizable.indexBackup > #botBackup then
                 customizable.indexBackup = customizable.indexBackup + 1
             end
             break
