@@ -434,7 +434,7 @@ reconnect = function(world, id, x, y)
             listenEvents(5)
             sleep(delaywarp * 1000)
         end
-        removeEvent(Event.variantlist)
+        removeEvents()
     end 
     if bot:isInWorld(world:upper()) and id ~= '' then
         while getTile(bot.x, bot.y).fg == 6 do
@@ -462,22 +462,14 @@ warp = function(world, door)
         name = name .. '|'  .. door
     end
     if not bot:isInWorld(world:upper()) then
-        local count = 0
         addEvent(Event.variantlist, events.onNuke)
         while not bot:isInWorld(world:upper()) and not nuked and not maxfind do
             clientStatus()
             bot:warp(name)
             listenEvents(5)
             sleep(delaywarp * 1000)
-            count = count + 1
-            if count == 25 then
-                count = 0
-                textInfo('', ': Maybe hard warp?, disconnecting bot and sleeping for ' .. delayidiotserver .. ' minutes')
-                bot:disconnect()
-                sleep(delayidiotserver * 60000)
-            end
         end
-        removeEvent(Event.variantlist)
+        removeEvents()
     end
     if bot:isInWorld(world:upper()) and door ~= '' then
         local stuck  = 0
@@ -619,7 +611,7 @@ onEvent = function(thread, id)
                                     while inventory:getItemCount(pack) > 0 do
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
-                                        sleep(delaydrop * 1000)
+                                        sleep(delaydrop)
                                         reconnect(world, door, tile.x + (indexEventX), tile.y - (indexEventY))
                                         count = count + 1
                                         if count >= 2 then
@@ -642,7 +634,7 @@ onEvent = function(thread, id)
                                     while inventory:getItemCount(pack) > 0 do
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
-                                        sleep(delaydrop * 1000)
+                                        sleep(delaydrop)
                                         reconnect(world, door, bot.x, bot.y)
                                         count = count + 1
                                         if count >= 2 then
@@ -726,7 +718,7 @@ onPack = function(thread, id)
                                     while inventory:getItemCount(pack) > 0 do
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
-                                        sleep(delaydrop * 1000)
+                                        sleep(delaydrop)
                                         reconnect(world, door, tile.x + (indexPackX), tile.y - (indexPackY))
                                         count = count + 1
                                         if count >= 2 then
@@ -749,7 +741,7 @@ onPack = function(thread, id)
                                     while inventory:getItemCount(pack) > 0 do
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
-                                        sleep(delaydrop * 1000)
+                                        sleep(delaydrop)
                                         reconnect(world, door, bot.x, bot.y)
                                         count = count + 1
                                         if count >= 2 then
@@ -832,7 +824,7 @@ onSeed = function(thread, id)
                                 while inventory:getItemCount(seed) > 0 do
                                     bot:setDirection(true)
                                     bot:drop(seed, 200)
-                                    sleep(delaydrop * 1000)
+                                    sleep(delaydrop)
                                     reconnect(world, door, tile.x + (indexSeedX), tile.y - (indexSeedY))
                                     count = count + 1
                                     if count >= 2 then
@@ -855,7 +847,7 @@ onSeed = function(thread, id)
                                 while inventory:getItemCount(seed) > 0 do
                                     bot:setDirection(true)
                                     bot:drop(seed, 200)
-                                    sleep(delaydrop * 1000)
+                                    sleep(delaydrop)
                                     reconnect(world, door, seedX + (indexSeedX), seedY - (indexSeedY))
                                     count = count + 1
                                     if count >= 2 then
@@ -937,7 +929,7 @@ onBlock = function(thread, id)
                                 while inventory:getItemCount(block) > 0 do
                                     bot:setDirection(true)
                                     bot:drop(block, 200)
-                                    sleep(delaydrop * 1000)
+                                    sleep(delaydrop)
                                     reconnect(world, door, tile.x + (indexBlockX), tile.y - (indexBlockY))
                                     count = count + 1
                                     if count >= 2 then
@@ -960,7 +952,7 @@ onBlock = function(thread, id)
                                 while inventory:getItemCount(block) > 0 do
                                     bot:setDirection(true)
                                     bot:drop(block, 200)
-                                    sleep(delaydrop * 1000)
+                                    sleep(delaydrop)
                                     reconnect(world, door, blockX + (indexBlockX), blockY - (indexBlockY))
                                     count = count + 1
                                     if count >= 2 then
@@ -1039,7 +1031,7 @@ wearingItemEvent = function()
                 bot.auto_collect = false
                 while inventory:getItemCount(idItemSupport) > keepItemSupport do
                     bot:drop(idItemSupport, inventory:getItemCount(idItemSupport) - keepItemSupport)
-                    sleep(delaydrop*1000)
+                    sleep(delaydrop)
                     reconnect(world, door, bot.x, bot.y)
                 end
             else
