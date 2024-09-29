@@ -1,3 +1,4 @@
+botEatVial = 720
 local bot = getBot()
 
 inventory = bot:getInventory()
@@ -17,6 +18,7 @@ local indexPackX, indexPackY = 0, 0
 local indexSeedX, indexSeedY = 0, 0
 local indexBlockX, indexBlockY = 0, 0
 local indexEventX, indexEventY = 0, 0
+local formatTime = os.time()
 
 seed = block + 1
 harvestTile = 5
@@ -424,6 +426,14 @@ clientStatus = function(world, door)
 end
 
 reconnect = function(world, id, x, y)
+    if malady then
+        local timed = os.time() - formatTime
+        local loggoning = math.floor(timed/60)
+        if loggoning >= botEatVial then
+            formatTime = os.time()
+            eatingVial()
+        end
+    end
     if bot.status ~= BotStatus.online then
         clientStatus(world, id)
     end
@@ -1004,15 +1014,87 @@ botsWearItem = function()
     end
 end
 
+eatingVial = function()
+    local function reconnects (world, id, x, y)
+        if bot.status ~= BotStatus.online then
+            clientStatus(world, id)
+        end
+        if not bot:isInWorld(world:upper()) then
+            addEvent(Event.variantlist, events.onNuke)
+            while not bot:isInWorld(world:upper()) and not nuked and not maxfind do
+                bot:warp(world:upper())
+                listenEvents(5)
+                sleep(delaywarp * 1000)
+            end
+            removeEvents()
+        end 
+        if bot:isInWorld(world:upper()) and id ~= '' then
+            while getTile(bot.x, bot.y).fg == 6 do
+                bot:warp(world:upper(), id:upper())
+                sleep(delaywarp * 1000)
+            end
+        end
+        if x and y then
+            while bot.x ~= x or bot.y ~= y do
+                bot:findPath(x, y)
+                sleep(150)
+            end
+        end
+    end
+    printed:append('Eating vial')
+    world = splitPattern(vialstorage[customizable.index], '[^|]+')[1]
+    door = splitPattern(vialstorage[customizable.index], '[^|]+')[2]
+    bot.auto_collect = false
+    warp(world, door)
+    if not nuked then
+        if not wrong then
+            ::back::
+            if inventory:getItemCount(vialItemId) == 0 and itemFloat(vialItemId) ~= 0 then
+                bot.auto_collect = true
+                for _, obj in pairs(bot:getWorld():getObjects()) do
+                    if obj.id == vialItemId and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
+                        bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
+                        sleep(100)
+                        reconnects(world, door, math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
+                    end
+                    if inventory:getItemCount(vialItemId) ~= 0 then
+                        break
+                    end
+                end
+                bot:moveLeft()
+                sleep(500)
+                bot:use(vialItemId)
+                sleep(500)
+                bot.auto_collect = false
+                while inventory:getItemCount(vialItemId) ~= 0 do
+                    bot:drop(vialItemId, inventory:getItemCount(vialItemId))
+                    sleep(delaydrop)
+                    reconnects(world, door, bot.x, bot.y)
+                end
+            else
+                textInfo('', 'Vial item is empty, Drop the Vial item right now! Bot sleeping for 10 seconds')
+                sleep(10000)
+                goto back
+            end
+        else
+            wrong = false
+            activityDesc('Id door world vial is wrong, check ur id door! Terminated script.')
+        end
+    else
+        nuked = false
+        activityDesc('World vial is nuked, check ur world! Terminated script.')
+    end
+end
+
 wearingItemEvent = function()
     printed:append('Take support items')
     world = splitPattern(worldwearitem[customizable.index], '[^|]+')[1]
     door = splitPattern(worldwearitem[customizable.index], '[^|]+')[2]
-    bot.auto_collect = true
     warp(world, door)
     if not nuked then
         if not wrong then
             if inventory:getItemCount(idItemSupport) == 0 and itemFloat(idItemSupport) >= keepItemSupport then
+                bot.auto_collect = true
                 for _, obj in pairs(bot:getWorld():getObjects()) do
                     if obj.id == idItemSupport and (#bot:getPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32) > 0)) then
                         bot:findPath(math.floor((obj.x + 10) / 32), math.floor((obj.y + 10) / 32))
@@ -1136,32 +1218,38 @@ droppingItems = function(thread, id)
 end
 
 inventoryItems = function(thread, id)
-    if inventory:getItemCount(idItemSupport) == 0 and wearingItemSupport then
-        while inventory:getItemCount(idItemSupport) == 0 do
-            wearingItemEvent(thread, id)
+    if not harvestonly then
+        if inventory:getItemCount(idItemSupport) == 0 and wearingItemSupport then
+            while inventory:getItemCount(idItemSupport) == 0 do
+                wearingItemEvent(thread, id)
+            end
+            shortcut(thread, id)
+        elseif switchOnLevel ~= 0 and bot.level >= switchOnLevel then
+            if autoSwitch then
+                droppingItems(thread, id)
+                onBackup(thread, id)
+            else
+                droppingItems(thread, id)
+                activityDesc('Bot reached max level')
+            end
+        elseif inventory:getItemCount(block) >= amountBlock then
+            if recycle then
+                itemRecycle(thread, id)
+            else
+                onBlock(thread, id)
+            end
+        elseif detectTable(eventList, amountEvent) then
+            onEvent(thread, id)
+        elseif inventory:getItemCount(seed) >= amountSeed then
+            onSeed(thread, id)
+        elseif bot.gem_count >= mingems and buypack then
+            buying()
+            onPack(thread, id)
         end
-        shortcut(thread, id)
-    elseif switchOnLevel ~= 0 and bot.level >= switchOnLevel then
-        if autoSwitch then
-            droppingItems(thread, id)
-            onBackup(thread, id)
-        else
-            droppingItems(thread, id)
-            activityDesc('Bot reached max level')
+    else
+        if detectTable(eventList, amountEvent) then
+            onEvent(thread, id)
         end
-    elseif inventory:getItemCount(block) >= amountBlock then
-        if recycle then
-            itemRecycle(thread, id)
-        else
-            onBlock(thread, id)
-        end
-    elseif detectTable(eventList, amountEvent) then
-        onEvent(thread, id)
-    elseif inventory:getItemCount(seed) >= amountSeed then
-        onSeed(thread, id)
-    elseif bot.gem_count >= mingems and buypack then
-        buying()
-        onPack(thread, id)
     end
 end
 
@@ -1220,6 +1308,9 @@ harvest = function(thread, id)
                     reconnect(thread, id, tile.x - 2, tile.y)
                 end
             end
+            if not bot.auto_collect then
+                bot.auto_collect = true
+            end
             botHarvest(thread, id)
         end
         inventoryItems(thread, id)
@@ -1234,6 +1325,9 @@ rechecking = function(world, id)
             sleep(100)
             local count = 0
             reconnect(world, id, tile.x, tile.y)
+            if not bot.auto_collect then
+                bot.auto_collect = true
+            end
             while isHarvested(tile.x, tile.y) and count < 25 do
                 bot:hit(tile.x, tile.y)
                 sleep(delayharvest)
@@ -1246,16 +1340,18 @@ rechecking = function(world, id)
 end
 
 collectFloat = function(worlds, id, itm)
-    while countFloating(itm) > 0 do
-        for _, obj in pairs(bot:getWorld():getObjects()) do
-            if obj.id == itm and (#getBot():getPath(math.floor(obj.x / 32), math.floor(obj.y / 32)) ~= 0) then
-                bot:findPath(math.floor(obj.x / 32), math.floor(obj.y / 32))
-                sleep(100)
-                reconnect(worlds, id, math.floor(obj.x / 32), math.floor(obj.y / 32))
-                break
+    if not harvestonly then
+        while countFloating(itm) > 0 do
+            for _, obj in pairs(bot:getWorld():getObjects()) do
+                if obj.id == itm and (#getBot():getPath(math.floor(obj.x / 32), math.floor(obj.y / 32)) ~= 0) then
+                    bot:findPath(math.floor(obj.x / 32), math.floor(obj.y / 32))
+                    sleep(100)
+                    reconnect(worlds, id, math.floor(obj.x / 32), math.floor(obj.y / 32))
+                    break
+                end
             end
+            inventoryItems(worlds, id)
         end
-        inventoryItems(worlds, id)
     end
 end
 
@@ -1277,7 +1373,9 @@ mainScript = function(worlds, id)
                 if not ignoregems then
                     collectFloat(worlds, id, 112)
                 end
-                droppingItems(worlds, id)
+                if not harvestonly then
+                    droppingItems(worlds, id)
+                end
                 formattedTime = os.time() - formattedTime
                 tableFormatted(string.sub(worlds, 1, 3) .. ' | ' .. (math.floor(formattedTime/60) .. ' Minutes'))
             else
@@ -1307,6 +1405,9 @@ if Information == 'Script Harvest made by Caramoy Syndicate, Link Discord : http
         for i = 1, indexMsg do
             table.insert(msg, readMsg[math.floor((getBot().index - 1) * indexMsg + i)])
         end
+    end
+    if malady then
+        eatingVial()
     end
     localInfo('Harvesting')
     for _, worldlist in pairs(farmList) do
