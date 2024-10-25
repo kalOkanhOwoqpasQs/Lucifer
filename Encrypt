@@ -1,3 +1,4 @@
+
 botEatVial = 720
 local bot = getBot()
 
@@ -1262,16 +1263,16 @@ botHarvesting = function(x, y, tbl)
     return false
 end
 
-botHarvest = function(w, d)
+botHarvest = function(w, d, x, y)
     local directions = {-2, 0, 2}
     for _, v in pairs(directions) do
         local count = 0
-        while botHarvesting(bot.x, bot.y, v) and count < 30 do
+        while botHarvesting(x, y, v) and count < 30 do
             for _, i in pairs(onTile) do
-                if isHarvested(bot.x + i, bot.y + v) then
-                    bot:hit(bot.x + i, bot.y + v)
+                if isHarvested(x + i, y + v) then
+                    bot:hit(x + i, y + v)
                     sleep(delayharvest)
-                    reconnect(w, d, bot.x, bot.y)
+                    reconnect(w, d, x, y)
                 end
             end
             count = count + 1
@@ -1287,31 +1288,34 @@ harvest = function(thread, id)
             bot:findPath(tile.x, tile.y)
             sleep(100)
             reconnect(thread, id, tile.x, tile.y)
+            if not bot.auto_collect then
+                bot.auto_collect = true
+            end
             if ((tile.y // 6) % 2 == 0) then
                 if (tile.x + 2) > 96 then
                     bot:findPath(96, tile.y)
                     sleep(100)
                     reconnect(thread, id, 96, tile.y)
+                    botHarvest(thread, id, 96, tile.y)
                 else
                     bot:findPath(tile.x + 2, tile.y)
                     sleep(100)
                     reconnect(thread, id, tile.x + 2, tile.y)
+                    botHarvest(thread, id, tile.x + 2, tile.y)
                 end
             else
                 if (tile.x - 2) < 3 then
                     bot:findPath(3, tile.y)
                     sleep(100)
                     reconnect(thread, id, 3, tile.y)
+                    botHarvest(thread, id, 3, tile.y)
                 else
                     bot:findPath(tile.x - 2, tile.y)
                     sleep(100)
                     reconnect(thread, id, tile.x - 2, tile.y)
+                    botHarvest(thread, id, tile.x - 2, tile.y)
                 end
             end
-            if not bot.auto_collect then
-                bot.auto_collect = true
-            end
-            botHarvest(thread, id)
         end
         inventoryItems(thread, id)
     end
