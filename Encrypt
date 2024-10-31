@@ -426,6 +426,10 @@ clientStatus = function(world, door)
     end
 end
 
+whiteDoor = function()
+    return getTile(bot.x, bot.y).fg == 6
+end
+
 reconnect = function(world, id, x, y)
     if malady then
         local timed = os.time() - formatTime
@@ -447,20 +451,20 @@ reconnect = function(world, id, x, y)
         end
         removeEvents()
     end 
-    if bot:isInWorld(world:upper()) and id ~= '' then
-        while getTile(bot.x, bot.y).fg == 6 do
+    if bot:isInWorld(world:upper()) and id ~= '' and whiteDoor() then
+        while whiteDoor() do
             bot:warp(world:upper(), id:upper())
             sleep(delaywarp * 1000)
         end
     end
-    if getTile(bot.x, bot.y).fg == 6 and id ~= '' then
-        while getTile(bot.x, bot.y).fg == 6 do
+    if whiteDoor() and id ~= '' then
+        while whiteDoor() do
             bot:warp(world:upper(), id:upper())
             sleep(delaywarp * 1000)
         end
     end
-    if x and y then
-        while bot.x ~= x or bot.y ~= y do
+    if (bot:isInWorld(world:upper()) and (id:upper() == '' and whiteDoor() and x and y) or (id:upper() ~= '' and not whiteDoor()) and x and y) then
+        while not bot:isInTile(x, y) do
             bot:findPath(x, y)
             sleep(150)
         end
@@ -468,7 +472,7 @@ reconnect = function(world, id, x, y)
 end
 
 warp = function(world, door)
-    name = world
+    name = world:upper()
     if door ~= '' then
         name = name .. '|'  .. door
     end
@@ -482,9 +486,9 @@ warp = function(world, door)
         end
         removeEvents()
     end
-    if bot:isInWorld(world:upper()) and door ~= '' then
+    if bot:isInWorld(world:upper()) and door ~= '' and whiteDoor() then
         local stuck  = 0
-        while getTile(bot.x, bot.y).fg == 6 and not wrong do
+        while whiteDoor() and not wrong do
             clientStatus()
             bot:warp(name)
             sleep(delaywarp * 1000)
@@ -636,7 +640,7 @@ onEvent = function(thread, id)
                                     bot:findPath(eventX + (indexEventX), eventY - (indexEventY))
                                     sleep(100)
                                     local count = 0
-                                    reconnect(world, door, bot.x, bot.y)
+                                    reconnect(world, door, eventX + (indexEventX), eventY - (indexEventY))
                                     if eventX + (indexEventX) >= 98 then
                                         indexEventY = indexEventY + 1
                                         indexEventX = 0
@@ -646,7 +650,7 @@ onEvent = function(thread, id)
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
                                         sleep(delaydrop)
-                                        reconnect(world, door, bot.x, bot.y)
+                                        reconnect(world, door, eventX + (indexEventX), eventY - (indexEventY))
                                         count = count + 1
                                         if count >= 2 then
                                             indexEventX = indexEventX + 1
@@ -742,7 +746,7 @@ onPack = function(thread, id)
                                 if getTile(packX + (indexPackX), packY - (indexPackY)).fg == 0 then
                                     bot:findPath(packX + (indexPackX), packY - (indexPackY))
                                     sleep(100)
-                                    reconnect(world, door, bot.x, bot.y)
+                                    reconnect(world, door, packX + (indexPackX), packY - (indexPackY))
                                     local count = 0
                                     if packX + (indexPackX) >= 98 then
                                         indexPackY = indexPackY + 1
@@ -753,7 +757,7 @@ onPack = function(thread, id)
                                         bot:setDirection(true)
                                         bot:drop(pack, 200)
                                         sleep(delaydrop)
-                                        reconnect(world, door, bot.x, bot.y)
+                                        reconnect(world, door, packX + (indexPackX), packY - (indexPackY))
                                         count = count + 1
                                         if count >= 2 then
                                             indexPackX = indexPackX + 1
